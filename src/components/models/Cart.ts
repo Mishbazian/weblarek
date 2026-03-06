@@ -8,13 +8,14 @@ export class Cart {
     }
 
     addProduct(product: IProduct): void {
-        if (!this.products.includes(product) && product.price) {
+        if (!this.hasProduct(product.id) && product.price) {
             this.products.push(product);
         }
     }
 
     removeProduct(id: string): void {
-        const removeIndex = this.products.findIndex((item) => item.id === id);
+        const removeIndex: number = this.products.findIndex((item) => item.id === id);
+        if(removeIndex < 0) {throw new Error ("Cart.removeProduct: wrong product id")}
         this.products.splice(removeIndex, 1);
     }
 

@@ -15,19 +15,19 @@ export class Catalogue {
         return this.selectedProduct;
     }
 
-    getProductById(id: string) {
-        
-        return this.products.find((item) => item.id === id);
+    getProductById(id: string): IProduct {
+        const product: IProduct | undefined = this.products.find((item) => item.id === id);
+        if (!product) {
+            throw new Error("Catalogue: wrong product id");
+        }
+        return product;
     }
 
     setProducts(productsList: IProduct[]) {
         this.products = [...productsList];
     }
     setSelectedProduct(id: string) {
-        const product = this.getProductById(id);
-        if (!product) {
-            throw new Error("Catalogue: Wrong product id");
-        }
+        const product: IProduct = this.getProductById(id);
         this.selectedProduct = product;
     }
 }
