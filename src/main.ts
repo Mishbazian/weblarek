@@ -1,19 +1,29 @@
+import { ProductApi } from "./components/api/ProductApi";
+import { Api } from "./components/base/Api";
 import { Buyer } from "./components/models/Buyer";
 import { Cart } from "./components/models/Cart";
 import { Catalogue } from "./components/models/Catalogue";
 import "./scss/styles.scss";
+import { API_URL } from "./utils/constants";
 import { apiProducts } from "./utils/data";
+
+//Тестирование методов
 //Каталог
 const productsModel = new Catalogue();
 console.log("Пустой массив товаров из каталога: ", productsModel.getProducts());
 //Наполним каталог
 productsModel.setProducts(apiProducts.items);
-console.log("Массив товаров из каталога: ", productsModel.getProducts());
+console.group("Массив товаров из каталога: ")
+console.table(productsModel.getProducts());
+console.groupEnd()
+
 //Получим товар по id
 let product = productsModel.getProductById(
     "854cef69-976d-4c2a-a18c-2aa45046c390",
 );
-console.log("Продукт, полученный по id", product);
+console.group("Продукт, полученный по id 854cef69-976d-4c2a-a18c-2aa45046c390");
+console.table(product)
+console.groupEnd()
 
 //добавим выбранный товар
 productsModel.setSelectedProduct("854cef69-976d-4c2a-a18c-2aa45046c390");
@@ -29,34 +39,36 @@ console.log("Пустая корзина: ", cartModel.getProducts());
 productsModel.getProducts().forEach((item) => {
     cartModel.addProduct(item);
 });
-console.log(
-    "Наполненная корзина: ",
-    [...cartModel.getProducts()],
-    "всего товаров -",
+
+
+console.group("Наполненная корзина: ")
+console.table([...cartModel.getProducts()])
+console.log("всего товаров -",
     cartModel.getProdctsCount(),
     "на сумму - ",
-    cartModel.getFullCost(),
+    cartModel.getFullCost(),)
+    console.log(
+    "есть ли товар 854cef69-976d-4c2a-a18c-2aa45046c390 в корзине? ",
+    cartModel.hasProduct("854cef69-976d-4c2a-a18c-2aa45046c390"),
 );
+console.groupEnd()
 
 //есть ли товар в корзине?
-console.log(
-    "есть ли товар в корзине? ",
-    cartModel.hasProduct("854cef69-976d-4c2a-a18c-2aa45046c390"),
-);
+
 // удалим один товар из корзины
 cartModel.removeProduct("854cef69-976d-4c2a-a18c-2aa45046c390");
-console.log(
-    "корзина после удаления одного товара: ",
-    [...cartModel.getProducts()],
-    "всего товаров -",
+console.group("Корзина после удаления одного товара: ")
+console.table([...cartModel.getProducts()])
+console.log("всего товаров -",
     cartModel.getProdctsCount(),
     "на сумму - ",
-    cartModel.getFullCost(),
-);
-console.log(
-    "есть ли удаленный товар в корзине? ",
+    cartModel.getFullCost(),)
+    console.log(
+    "есть ли удаленный товар 854cef69-976d-4c2a-a18c-2aa45046c390 в корзине? ",
     cartModel.hasProduct("854cef69-976d-4c2a-a18c-2aa45046c390"),
 );
+console.groupEnd()
+
 //Очистим корзину
 cartModel.clearProducts()
 console.log(
@@ -70,18 +82,43 @@ console.log(
 
 //Покупатель
 const buyerModel = new Buyer();
-console.log("Пустые данные покупателя: ", buyerModel.getData());
-console.log("Валидация - ", buyerModel.validateData())
+console.group("Пустые данные покупателя: ")
+console.table(buyerModel.getData());
+console.table(buyerModel.validateData())
+console.groupEnd()
 
 //Запишем часть данных
 buyerModel.setData({payment: "Cash", phone: "8880022222"})
-console.log("Данные покупателя: ", buyerModel.getData());
-console.log("Валидация - ", buyerModel.validateData())
+console.group("Данные покупателя заполнены частично: ")
+console.table(buyerModel.getData());
+console.table(buyerModel.validateData())
+console.groupEnd()
+
 //Запишем все данные
-buyerModel.setData({payment: "Online", phone: "80000000000", address: "Масква", email: "кокоййто мейл"})
-console.log("Данные покупателя: ", buyerModel.getData());
-console.log("Валидация - ", buyerModel.validateData())
+buyerModel.setData({phone: "80000000000", address: "Масква", email: "кокоййто мейл"})
+console.group("Данные покупателя дозаполнены полностью: ")
+console.log(buyerModel.getData());
+console.log("Валидация (все поля заполнены) - ", buyerModel.validateData())
+console.groupEnd()
+
 //Очистим все данные
 buyerModel.clearData()
-console.log("Данные покупателя после очистки: ", buyerModel.getData());
-console.log("Валидация - ", buyerModel.validateData())
+console.group("Данные покупателя после очистки: ")
+console.table(buyerModel.getData());
+console.groupEnd()
+//Тестируем получение данных с сервера
+const api = new ProductApi(new Api(API_URL));
+//Обновление данных с сервера и наолние каталога
+async function updateCatalogue() {
+    try {
+        const productsList = await api.getProducts();
+        //Наполним каталог
+        productsModel.setProducts(productsList);
+        console.group("==Каталог заполненный с сервера==")
+        console.table(productsList);
+        console.groupEnd()
+    } catch (err: unknown) {
+        console.error("Couldn't load data: ", err);
+    }
+}
+updateCatalogue();
