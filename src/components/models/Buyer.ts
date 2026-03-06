@@ -27,7 +27,7 @@ export class Buyer {
         },
         address: {
             validateFn: () => isFilledString(this.data.address),
-            message: "Необходимо укаазать номер адрес",
+            message: "Необходимо укаазать адрес",
         },
     };
 
