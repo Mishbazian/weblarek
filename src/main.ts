@@ -4,6 +4,7 @@ import { Buyer } from "./components/models/Buyer";
 import { Cart } from "./components/models/Cart";
 import { Catalogue } from "./components/models/Catalogue";
 import "./scss/styles.scss";
+import { IProduct } from "./types";
 import { API_URL } from "./utils/constants";
 import { apiProducts } from "./utils/data";
 
@@ -20,16 +21,19 @@ console.groupEnd()
 //Получим товар по id
 let product = productsModel.getProductById(
     "854cef69-976d-4c2a-a18c-2aa45046c390",
-);
+) as IProduct;
 console.group("Продукт, полученный по id 854cef69-976d-4c2a-a18c-2aa45046c390");
 console.table(product)
 console.groupEnd()
 
 //добавим выбранный товар
-productsModel.setSelectedProduct("854cef69-976d-4c2a-a18c-2aa45046c390");
+productsModel.setSelectedProduct(product);
 console.log("Выбранный товар - ", productsModel.getSelectedProduct());
 //изменим выбранный товар
-productsModel.setSelectedProduct("c101ab44-ed99-4a54-990d-47aa2bb4e7d9");
+product = productsModel.getProductById(
+    "c101ab44-ed99-4a54-990d-47aa2bb4e7d9"
+) as IProduct;
+productsModel.setSelectedProduct(product);
 console.log("Выбранный товар - ", productsModel.getSelectedProduct());
 
 //Корзина
@@ -56,7 +60,7 @@ console.groupEnd()
 //есть ли товар в корзине?
 
 // удалим один товар из корзины
-cartModel.removeProduct("854cef69-976d-4c2a-a18c-2aa45046c390");
+cartModel.removeProduct(cartModel.getProducts()[0]);
 console.group("Корзина после удаления одного товара: ")
 console.table([...cartModel.getProducts()])
 console.log("всего товаров -",

@@ -13,10 +13,8 @@ export class Cart {
         }
     }
 
-    removeProduct(id: string): void {
-        const removeIndex: number = this.products.findIndex((item) => item.id === id);
-        if(removeIndex < 0) {throw new Error ("Cart.removeProduct: wrong product id")}
-        this.products.splice(removeIndex, 1);
+    removeProduct(product: IProduct): void {
+        this.products = this.products.filter((item) => item.id !== product.id);
     }
 
     clearProducts(): void {
