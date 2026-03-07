@@ -2,32 +2,25 @@ import { IProduct } from "../../types";
 
 export class Catalogue {
     private products: IProduct[] = [];
-    private selectedProduct?: IProduct;
+    private selectedProduct: IProduct | null = null;
 
     getProducts(): IProduct[] {
         return this.products;
     }
 
-    getSelectedProduct(): IProduct {
-        if (!this.selectedProduct) {
-            throw new Error("Catalogue: selectedProduct is undefined");
-        }
+    getSelectedProduct(): IProduct | null {
         return this.selectedProduct;
     }
 
-    getProductById(id: string): IProduct {
-        const product: IProduct | undefined = this.products.find((item) => item.id === id);
-        if (!product) {
-            throw new Error("Catalogue: wrong product id");
-        }
-        return product;
+    getProductById(id: IProduct["id"]): IProduct | undefined {
+        return this.products.find((item) => item.id === id);
     }
 
     setProducts(productsList: IProduct[]) {
         this.products = [...productsList];
     }
-    setSelectedProduct(id: string) {
-        const product: IProduct = this.getProductById(id);
+    
+    setSelectedProduct(product: IProduct) {
         this.selectedProduct = product;
     }
 }
