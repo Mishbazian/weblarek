@@ -52,3 +52,7 @@ export interface IOrderResponse {
     id: string;
     total: number;
 }
+
+export interface IHeader {
+    counter: number;
+}
