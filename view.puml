@@ -1,0 +1,211 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam groupInheritance 3
+
+
+
+class  Component<T> <<abstract>> {
+
+    # readonly container: HTMLElement
+    # setImage(HTMLImageElement, src: string, alt?: string);
+    + render(data?: Partial<T>): HTMLElement;
+}
+
+interface IComponent<T> {
+    container: HTMLElement;
+    render(data?: Partial<T>): HTMLElement;
+}
+
+
+'----Хедер-----'
+interface IHeader <<interface>>{
+    counter: number;
+}
+
+class HeaderView extends Component {
+
+    -cartButton: HTMLButtonElement;
+    -cartCounter: HTMLElement;
+    set counter(value: IHeader)
+}
+HeaderView --> IHeader
+
+interface IGallery <<interface>>{
+    catalogue: HTMLElement[];
+}
+
+class Gallery extends Component {
+
+    -catalogueElement: HTMLElement;
+    set catalogue(IGallery);
+}
+
+Gallery --> IGallery
+
+'------Модалка---------'
+interface IModal {
+    content: HTMLElement;
+    isOpen: boolean;
+}
+
+class Modal extends Component {
+    - closeElement: HTMLButtonElement;
+    - contentContainer: HTMLElement;
+
+    set content(HTMLElement);
+    set isOpen(Boolean);
+}
+Modal --> IModal
+
+'-----Карточки------'
+interface ICardBase<<interface>> {
+    title: string;
+    price: string;
+}
+
+interface ICardCatalog<<interface>> extends ICardBase {
+    category: string;
+    imgUrl: string;
+}
+
+ 
+class Card<T> <<abstract>> extends Component {
+    titleElement: HTMLElement;
+    priceElement: HTMLElement;
+
+    {abstract} set content(value: T): void;
+}
+
+class CardInfo<T> <<abstract>> extends Card {
+    # categoryElement: HTMLElement;
+    # imageElement: HTMLImageElement;
+
+    # set category(string);
+    # set image(string);
+}
+
+class CardCatalog extends CardInfo {
+    - showPreviewElement: HTMLElement; 
+}
+
+' @todo вынести в константы
+' const buyButtonSettings { 
+'     BUY: { text: "Купить", disabled: false },
+'     REMOVE: {text:"Удалить из корзины", disabled: false},
+'     DISABLED: {text: "Недоступно", disabled: true}
+'   }
+
+interface ITextButton {
+    buttonText: string;
+    isDisabled: boolean;
+}
+
+interface ICardFull <<interface>> extends ICardCatalog {
+    description: string;
+    controlSettings: ITextButton;
+}
+
+class CardPreview extends CardInfo {
+    - descriptionElement: HTMLElement;
+    - buyControlElement: HTMLElement;
+
+    - set description(string);
+    - set buyControlSettings(ITextButton);
+}
+
+class CardBasket extends Card {
+    - indexElement: HTMLElement;
+    set index(number);
+}
+
+CardCatalog -> ICardCatalog
+CardBasket -> ICardBase
+CardPreview -> ICardFull
+
+interface IOrderSuccess <<interface>>{
+    total: number;
+}
+
+class OrderSuccess extends Component {
+    -totalElement: HTMLElement;
+    -buttonElement: HTMLButtonElement
+    set total(IOrderSuccess)
+}
+
+OrderSuccess --> IOrderSuccess
+
+
+interface IBasket <<interface>>{
+    itemList: ICardBase[];
+    basketPrice: number;
+}
+class Basket extends Component {
+    listElement: HTMLUlElement;
+    buttonElement: HTMLButtonElement;
+    priceElement: HTMLElement;
+    set content(IBasket);
+}
+Basket --> IBasket
+
+
+'-----Кнопки----'
+
+interface ITogglerButtons <<interface>> {
+    activeBtnName: string;
+}
+
+class TogglerButtons extends Component {
+    - readonly activeBtnClassName: string;
+    buttons: HTMLButtonElement[];
+    set activeBtn(string);
+}
+
+TogglerButtons --> ITogglerButtons
+
+'---Формы----'
+
+class Form<T> <<abstract>> extends Component {
+    - submitElement: HTMLButtonElement;
+    -errorsElement: HTMLSpanElement;
+    abstract set formStatus(T);
+}
+
+interface IFormStatus <<interface>> {
+    submitDisabled: boolean;
+    errors: string[];
+}
+
+'type TFormOrderStatus  IFormStatus & ITogglerButtons
+
+class FormOrder extends Form {
+    - paymentToggler: IComponent<ITogglerButtons>>
+    - addressInput: HTMLInputElement;
+
+    set paymentTogglerSettings(ITogglerButtons)
+    set formStatus(IFormStatus)
+    render(TFormOrderStatus)
+}
+
+class FormConacts extends Form {
+    - emailInput: HTMLInputElement;
+    - phoneInput: HTMLInputElement;
+
+    set formStatus(IFormStatus)
+}
+
+FormOrder --> IFormOrderStatus
+FormConacts --> IFormStatus
+
+
+Gallery "n" o-- "0..n" CardCatalog
+Basket "n" o-- "0..n" CardBasket
+
+
+
+
+
+
+hide class circle
+hide interface circle
+@enduml
