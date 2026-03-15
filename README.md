@@ -346,3 +346,262 @@ interface IOrderResponse { id: string; total: number; }
 `getProducts(): Promise<IProduct[]>` - запрашивает данные со списком товаров с сервера, возвращает промис ответа сервера со списком товаров;
 
 `sendOrder(): Promise<IOrderResponse>` \- отправляет запрос на создание заказа. возвращает промис ответа сервера.
+
+### Слой представления
+- Компонент `Gallery` содержит множество карточек `CardCatalog` (агрегация «0..n»).
+- Компонент `Basket` содержит множество карточек `CardBasket` (агрегация «0..n»).
+- Компонент `FormOrder` использует `TogglerButtons` через композицию.
+- Все компоненты генерируют события (через `EventEmitter`), которые обрабатываются презентером.
+
+#### Диаграмма классов
+
+![alt text](view.png)
+
+#### Интерфейсы представления
+
+Для типизации данных, передаваемых в компоненты, определены следующие интерфейсы:
+
+- **IComponent &lt;T&gt;** – общий интерфейс для всех компонентов. Может быть использован для типизации компонентов в композиции, но не является обязательным для наследования.
+  ```typescript
+  interface IComponent<T> {
+      container: HTMLElement;
+      render(data?: Partial<T>): HTMLElement;
+  }
+  ```
+
+- **IHeader** – данные для компонента Header:
+  ```typescript
+  interface IHeader {
+      counter: number; // количество товаров в корзине
+  }
+  ```
+
+- **IGallery** – данные для компонента Gallery:
+  ```typescript
+  interface IGallery {
+      catalogue: HTMLElement[]; // массив DOM-элементов карточек каталога
+  }
+  ```
+
+- **IModal** – данные для модального окна:
+  ```typescript
+  interface IModal {
+      content: HTMLElement; // содержимое модального окна
+      isOpen: boolean;      // состояние открытия
+  }
+  ```
+
+- **ICardBase** – базовые данные карточки товара:
+  ```typescript
+  interface ICardBase {
+      title: string;  // заголовок
+      price: string;  // цена в виде строки (с валютой)
+  }
+  ```
+
+- **ICardCatalog** – данные карточки товара в каталоге (расширяет ICardBase):
+  ```typescript
+  interface ICardCatalog extends ICardBase {
+      category: string; // категория товара
+      imgUrl: string;   // URL изображения
+  }
+  ```
+
+- **ITextButton** – настройки текстовой кнопки:
+  ```typescript
+  interface ITextButton {
+      buttonText: string;   // текст на кнопке
+      isDisabled: boolean;  // доступность кнопки
+  }
+  ```
+
+- **ICardFull** – полные данные карточки товара (используется в CardPreview) наследует поля из ICardCatalog :
+  ```typescript
+  interface ICardFull extends ICardCatalog {
+      description: string;       // описание товара
+      buyControlSettings: ITextButton; // настройки кнопки 
+  }
+  ```
+
+- **IOrderSuccess** – данные для компонента успешного заказа:
+  ```typescript
+  interface IOrderSuccess {
+      total: number; // итоговая сумма заказа
+  }
+  ```
+
+- **IBasket** – данные для компонента корзины:
+  ```typescript
+  interface IBasket {
+      itemList: ICardBase[]; // список товаров (базовые данные)
+      basketPrice: number;   // общая стоимость
+  }
+  ```
+
+- **IFormStatus** – статус формы (общий):
+  ```typescript
+  interface IFormStatus {
+      submitDisabled: boolean; // доступность кнопки отправки
+      errors: string[];        // список ошибок
+  }
+  ```
+
+- **ITogglerButtons** – состояние переключателя кнопок:
+  ```typescript
+  interface ITogglerButtons {
+      activeBtnName: string; // имя активной кнопки
+  }
+  ```
+
+- **TFormOrderStatus** – составной статус формы заказа (пересечение типов):
+  ```typescript
+  type TFormOrderStatus = IFormStatus & ITogglerButtons;
+  ```
+
+#### Классы компонентов
+
+Все компоненты наследуются от базового класса `Component<T>`, где `T` – соответствующий интерфейс данных.
+
+#### Абстрактный класс Card&lt;T&gt;
+
+Базовый класс для всех карточек товара.
+
+**Поля:**
+- `titleElement: HTMLElement` – элемент заголовка
+- `priceElement: HTMLElement` – элемент цены
+
+**Методы:**
+- `set content(value: T): void` – абстрактный сеттер для обновления данных карточки
+
+#### Абстрактный класс CardInfo&lt;T&gt;
+
+Наследует `Card<T>` и добавляет работу с изображением и категорией.
+
+**Поля:**
+- `categoryElement: HTMLElement` – элемент категории
+- `imageElement: HTMLImageElement` – элемент изображения
+
+**Методы (защищённые):**
+- `set category(value: string): void` – устанавливает категорию
+- `set image(value: string): void` – устанавливает изображение (использует `setImage` из `Component`)
+
+
+
+#### Класс Header
+ – отображает логотип и счётчик товаров в корзине.
+   **Поля:**
+    `cartButton: HTMLButtonElement`
+    `cartCounter: HTMLElement`
+   **Сеттер:** 
+   `set counter(value: IHeader)` – обновляет счётчик
+
+#### Класс Gallery
+ – контейнер для карточек каталога.
+   - **Поля:** `catalogueElement: HTMLElement`
+   - **Сеттер:** `set catalogue(value: IGallery)` – заполняет каталог карточками `CardCatalog`
+
+#### Класс Modal
+– управляет модальным окном.
+   - **Поля:** `closeElement: HTMLButtonElement`, `contentContainer: HTMLElement`
+   - **Сеттеры:** `set content(value: HTMLElement)`, `set isOpen(value: boolean)` – управляют содержимым и видимостью
+
+#### Класс CardCatalog
+– карточка товара в каталоге (наследует `CardInfo<ICardCatalog>`).
+   - **Поля:** `showPreviewElement: HTMLElement` – элемент для открытия предпросмотра
+   - **Сеттер:** `set content(value: ICardCatalog)` – заполняет данные карточки
+
+#### Класс CardPreview
+– карточка товара в режиме предпросмотра (наследует `CardInfo<ICardFull>`).
+   - **Поля:** `descriptionElement: HTMLElement`, `buyControlElement: HTMLElement`
+   - **Сеттеры:** `set description(value: string)`, `set buyControlSettings(value: ITextButton)` – управляют описанием и кнопкой
+
+#### Класс CardBasket
+– карточка товара в корзине (наследует `Card<ICardBase>`).
+
+   **Поля:** 
+
+   `indexElement: HTMLElement` – элемент номера позиции
+
+   **Сеттер:** 
+   
+   `set index(value: number)` – устанавливает порядковый номер
+
+#### Класс Basket
+– компонент корзины, отображает список товаров и общую стоимость.
+   
+   **Поля:**
+
+   `listElement: HTMLUListElement` -, 
+
+   `buttonElement: HTMLButtonElement`, 
+
+   `priceElement: HTMLElement`
+
+   **Сеттеры:** 
+   
+   `set content(value: IBasket)` – обновляет список и стоимость
+
+#### Класс OrderSuccess
+– сообщение об успешном оформлении заказа.
+  **Поля:** 
+
+   `totalElement: HTMLElement`,
+
+   `buttonElement: HTMLButtonElement`
+
+   **Сеттер:** 
+   
+   `set total(value: IOrderSuccess)` – устанавливает итоговую сумму
+
+#### Класс TogglerButtons
+– компонент переключателя кнопок (например, выбор способа оплаты).
+   
+   **Поля:**
+
+   `buttons: HTMLButtonElement[]`,
+
+   `activeBtnClassName: string`
+
+   **Сеттер:**
+   
+   `set activeBtn(value: string)` – устанавливает активность кнопок по имени
+
+#### Класс Form&lt;T&gt;
+
+**Поля:**
+
+`submitElement: HTMLButtonElement`,
+
+`errorsElement: HTMLSpanElement`
+
+**Абстрактный сеттер:** 
+
+`set formStatus(value: T): void` – обновляет состояние формы
+
+#### Класс FormOrder
+– форма выбора способа оплаты и адреса доставки (наследует `Form<TFormOrderStatus>`). Использует `TogglerButtons` через композицию.
+
+**Поля:**
+
+`paymentToggler: IComponent<ITogglerButtons>` (композиция), 
+
+`addressInput: HTMLInputElement`
+
+**Сеттеры:**
+
+`set paymentTogglerSettings(value: ITogglerButtons)`,
+
+`set formStatus(value: IFormStatus)`
+
+#### Класс FormContacts
+– форма ввода контактных данных (наследует `Form<IFormStatus>`).
+
+**Поля:**
+`emailInput: HTMLInputElement` -,
+
+`phoneInput: HTMLInputElement`
+
+**Сеттер:** 
+
+`set formStatus(value: IFormStatus)` – обновляет состояние формы
+
