@@ -20,3 +20,11 @@ export const settings = {
 
 };
 
+/*константа соответствия состояний кнопки покупки товара*/ 
+export const orderButtonStateMap = { 
+     'BUY': { text: "Купить", disabled: false },
+     'REMOVE': {text:"Удалить из корзины", disabled: false},
+     'DISABLED': {text: "Недоступно", disabled: true}
+   }
+
+
