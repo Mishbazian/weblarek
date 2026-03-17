@@ -114,80 +114,51 @@ Presenter - презентер содержит основную логику п
 
 ### Данные
 
-#### Интерфейс IProduct
+- **Интерфейс IProduct** определяет набор полей отдельного Товара. Используется для единого представления данных о товаре в разных частях приложения.
 
-Определяет набор полей отдельного Товара. Используется для единого представления данных о товаре в разных частях приложения.
+  ```typescript
+  interface IProduct {
+    id: string; //- уникальный идентификатор товара в приложении;
+    description: string; // - текстовое описание товара;
+    image: string; // - ссылка на изображение товара на сервере;
+    title: string; // - название товара
+    category: string; // - категория товара
+    price: number | null; //- цена товара
+  }
+  ```
+- **Интерфейс IByer** определяет набор полей для работы с данными покупателя при заказе
 
-```typescript
-interface IProduct {
-  id: string;
-  description: string;
-  image: string;
-  title: string;
-  category: string;
-  price: number | null;
-}
-```
+  ```typescript
+  interface IBuyer {
+    payment: TPayment = ""; // - выбранный покупателем вид оплаты. Принимает одно из предопределенных в `TPayment` значений, например «Card» или «Cash».
+    email: string; // -  указанный покупателем email;
+    phone: string; // - указанный покупателем номер телефона;
+    address: string; // - - указанный покупателем адрес доставки.
+  }
+  ```
 
-`id: string` - уникальный идентификатор товара в приложении;
 
-`description: string` - текстовое описание товара;
 
-`image: string` - ссылка на изображение товара;
+- `type TPayment = "Card" | "Cash" | ""`\- вид оплаты - набор предопределенных значений для выбора пользователем
 
-`title: string` - название товара
+- `type TValidationRules<T>` - обобщенный тип данных, принимает в параметр T интерфейс или тип данных в виде объекта, позволяет хранить правила для каждого ключа принятого объекта:
 
-`category: string` - категория товара
+  ```typescript
+  type TValidationRules<T> = {
+      [key in keyof T]: {
+          validateFn: () => boolean; // - функция валидации поля
+          message: string; // - текстовое сообщение
+      };
+  };
+  ```
 
-`price: number | null` - цена товара
+- `type TValidationErrorMessages<T>` - обобщенный тип данных, принимает в параметр T интерфейс или тип данных в виде объекта, позволяет хранить объект с ключами принятого объекта и текстовыми сообщениями об ошибках валидации для этого ключа.
 
-#### Интерфейс IByer
-
-Определяет набор полей для работы с данными покупателя при заказе
-
-```typescript
-interface IBuyer {
-  payment: TPayment = "";
-  email: string;
-  phone: string;
-  address: string;
-}
-```
-
-`payment: TPayment` - выбранный покупателем вид оплаты. Принимает одно из предопределенных в `TPayment` значений, например «Card» или «Cash».
-
-`email: string` -  указанный покупателем email;
-
-`phone: string` - указанный покупателем номер телефона;
-
-`address: string` - указанный покупателем адрес доставки.
-
-#### Собственные типы данных
-
-`type TPayment = "Card" | "Cash" | ""`\- вид оплаты - набор предопределенных значений для выбора пользователем
-
-```
-TValidationRules<T> = {
-    [key in keyof T]: {
-        validateFn: () => boolean;
-        message: string;
-    };
-};
-```
-
-\- обобщенный тип данных, принимает в параметр T интерфейс или тип данных в виде объекта, позволяет хранить правила для каждого ключа принятого объекта:
-
-\-  `validateFn: ()=>boolean;` - функция валидации поля
-
-\-  `message: string` - текстовое сообщение
-
-```
-TValidationErrorMessages<T> = {
-  [key in keyof T]: string;
-}
-```
-
-\- обобщенный тип данных, принимает в параметр T интерфейс или тип данных в виде объекта, позволяет хранить объект с ключами принятого объекта и текстовыми сообщениями об ошибках валидации для этого ключа.
+  ```typescript
+  TValidationErrorMessages<T> = {
+    [key in keyof T]: string;
+  }
+  ```
 
 ### Модели данных
 
@@ -195,163 +166,156 @@ TValidationErrorMessages<T> = {
 
 Отвечает за хранение списка товаров и выбранного товара, устанавливает логику работы со списком товаров в каталоге/
 
-**Конструктор:**
+Конструктор:
 
 Конструктор класса не принимает параметров.
 
-**Поля:**
+Поля:
 
-`products: IProduct[] = []` - массив товаров в каталоге. По умолчанию установлен пустой массив;
+- `products: IProduct[] = []` - массив товаров в каталоге. По умолчанию установлен пустой массив;
 
-`selectedProduct?: IProduct | null = null` -  выбранный к просмотру товар. По умолчанию null.
+- `selectedProduct?: IProduct | null = null` -  выбранный к просмотру товар. По умолчанию null.
 
-**Методы:**
+Методы:
 
-`setProducts(products: IProduct[]) :void` - принимает массив товаров и записывает его в экземпляр каталога;
+- `setProducts(products: IProduct[]) :void` - принимает массив товаров и записывает его в экземпляр каталога;
 
-`setSelectedProduct(product: IProduct): void` - записывает объект данных товара полученный в аргументе в поле SelectedProduct;
+- `setSelectedProduct(product: IProduct): void` - записывает объект данных товара полученный в аргументе в поле SelectedProduct;
 
-`getProducts():IProduct[]`  - возвращает массив товаров из Каталога;
+- `getProducts():IProduct[]`  - возвращает массив товаров из Каталога;
 
-`getSelectedProduct(): IProduct | null` - возвращает объект с данными выбранного к просмотру товара из поля SelectedProduct, при отсутствии выбранного товара, возвращает null;
+- `getSelectedProduct(): IProduct | null` - возвращает объект с данными выбранного к просмотру товара из поля SelectedProduct, при отсутствии выбранного товара, возвращает null;
 
-`getProductById(id: string): IProduct` - возвращает из каталога объект данных товара с полученным в аргументе id.
+- `getProductById(id: string): IProduct` - возвращает из каталога объект данных товара с полученным в аргументе id.
 
 #### Класс Cart (Корзина)
 
 Отвечает за хранение товаров в корзине, получение данных о содержимом корзины и устанавливает логику управления товарами в корзине: добавление, удаление.
 
-**Поля:**
+Поля:
 
-`products: IProduct[] = []` - массив товаров, добавленных в корзину, по умолчанию пустой массив.
+- `products: IProduct[] = []` - массив товаров, добавленных в корзину, по умолчанию пустой массив.
 
-**Конструктор**
+Конструктор: 
 
-Конструктор класса не принимает параметров.
+*Конструктор класса не принимает параметров.*
 
-**Методы**
+Методы:
 
-`getProducts(): IProduct[]`   - возвращает массив товаров, содержащихся в корзине пользователя;
+- `getProducts(): IProduct[]`   - возвращает массив товаров, содержащихся в корзине пользователя;
 
-`addProduct(product: IProduct[]): void`  - принимает объект товара, выбранного для добавления, записывает его в массив товаров экземпляра корзины;
+- `addProduct(product: IProduct[]): void`  - принимает объект товара, выбранного для добавления, записывает его в массив товаров экземпляра корзины;
 
-`removeProduct(id: string): void`  - удаляет товар с полученным в аргументе id из массива товаров экземпляра корзины;
+- `removeProduct(id: string): void`  - удаляет товар с полученным в аргументе id из массива товаров экземпляра корзины;
 
-`clearProducts() : void` - удаляет все товары из корзины;
+- `clearProducts() : void` - удаляет все товары из корзины;
 
-`getFullCost() : number` - возвращает полную стоимость всех товаров в корзине;
+- `getFullCost() : number` - возвращает полную стоимость всех товаров в корзине;
 
-`getProductsCount() - number` - возвращает количество товаров, добавленных в корзину;
+- `getProductsCount() - number` - возвращает количество товаров, добавленных в корзину;
 
-`hasProduct(id: string) : boolean` - проверяет добавлен ли товар в корзину, возвращает true при положительном результате, false - если товара в корзине нет;
+- `hasProduct(id: string) : boolean` - проверяет добавлен ли товар в корзину, возвращает true при положительном результате, false - если товара в корзине нет;
 
 #### Класс Buyer
 
 Отвечает за хранение и устанавливает логику использование данных покупателя при заказе.
 
-**Поля:**
+Поля:
 
-`data: IBuyer = { payment: "", email: "", phone: "", address: "" }`\- объект с данными Покупателя по форме установленной в интерфейсе IBuyer. По умолчанию все значения в объекте - пустые строки.
+- `data: IBuyer = { payment: "", email: "", phone: "", address: "" }`\- объект с данными Покупателя по форме установленной в интерфейсе IBuyer. По умолчанию все значения в объекте - пустые строки.
 
-`validationRules: TValidationRules<IBuyer>` - поле только для чтения - объект, содержащий правила валидации поля data класса. Осован на дженерик-типе данных.
+- `validationRules: TValidationRules<IBuyer>` - поле только для чтения - объект, содержащий правила валидации поля data класса. Осован на дженерик-типе данных.
+  ```typescript
+  private readonly validationRules: TValidationRules<IBuyer> = {
+      payment: {
+          validateFn: () => isFilledString(this.data.payment.toString()),
+          message: "Необходимо укаазать вид оплаты",
+      },
+      email: {
+          validateFn: () => isFilledString(this.data.email),
+          message: "Необходимо укаазать email",
+      },
+      phone: {
+          validateFn: () => isFilledString(this.data.phone),
+          message: "Необходимо укаазать номер телефона",
+      },
+      address: {
+          validateFn: () => isFilledString(this.data.address),
+          message: "Необходимо укаазать номер адрес",
+      },
+  };
+  ```
 
-```
-private readonly validationRules: TValidationRules<IBuyer> = {
-    payment: {
-        validateFn: () => isFilledString(this.data.payment.toString()),
-        message: "Необходимо укаазать вид оплаты",
-    },
-    email: {
-        validateFn: () => isFilledString(this.data.email),
-        message: "Необходимо укаазать email",
-    },
-    phone: {
-        validateFn: () => isFilledString(this.data.phone),
-        message: "Необходимо укаазать номер телефона",
-    },
-    address: {
-        validateFn: () => isFilledString(this.data.address),
-        message: "Необходимо укаазать номер адрес",
-    },
-};
-```
+Конструктор:
 
-**Конструктор**
+*Конструктор класса не принимает параметров.*
 
-Конструктор класса не принимает параметров.
+Методы
 
-**Методы**
+- `setData(fields: Partial<IBuyer>): void` - принимает объект с полученными значениями данных Покупателя и записывает их в модель.
 
-`setData(fields: Partial<IBuyer>): void` - принимает объект с полученными значениями данных Покупателя и записывает их в модель.
+- `getData(): IBuyer` - позволяет получить все сохраненные данные Покупателя
 
-`getData(): IBuyer` - позволяет получить все сохраненные данные Покупателя
+- `clearData(): void` - очищает все сохраненные данные Покупателя
 
-`clearData(): void` - очищает все сохраненные данные Покупателя
-
-`validateData(): Partial<TValidationErrorMessages<IBuyer>>` - проверяет поля экземпляра класса и возвращает объект с описаниями полученных ошибок валидации.
+- `validateData(): Partial<TValidationErrorMessages<IBuyer>>` - проверяет поля экземпляра класса и возвращает объект с описаниями полученных ошибок валидации.
 
 ### Слой коммуникации
 
-#### Интерфейс IOrder
+#### Интерфейсы и типы данных
+- **IOrder** - определяет набор полей при отправке запроса с заказом на сервер, расширяет интерфейс IByer (данные покупателя)
 
-Определяет набор полей при отправке запроса с заказом на сервер
+  ```typescript
+  interface IOrder extends IBuyer {
+    total: number; // - итоговая стоимость товаров в заказе
+    items: IProduct["id"][]; } // - массив с id товаров в заказзе
+  ```
 
-```typescript
+- **IProductResponse** типизирует данные, получаемые от сервера в ответ на запрос товаров каталога
 
-interface IOrder extends IBuyer { total: number; items: IProduct["id"][]; }
-```
+  ```typescript
+  interface IProductResponse {
+     total: number; // - количество товаров в ответе
+     items: IProduct[]; // - массив объектов товаров
+     }
+  ```
 
-`IBuyer` \- объект с данными покупателя total: number - суммарная стоимость всех товаров в заказе `items: IProduct["id"][]` \- массив с id товаров в заказе
-
-#### Интерфейс IProductResponse
-
-Типизирует данные, получаемые от сервера в ответ на запрос товаров каталога
-
-```typescript
-
-interface IProductResponse { total: number; items: IProduct[]; }
-```
-
-`total: number` - количество товаров в ответе items: IProduct\[\] - массив товаров
-
-#### Интерфейс IOrderResponse
-
-Типизирует данные, получаемые от сервера в ответ на запрос с заказом
-
-```typescript
-
-interface IOrderResponse { id: string; total: number; }
-```
-
-`id: string` - id заказа;
-
-`total: number` - итоговая сумма оплаты/
+- **IOrderResponse** типизирует данные, получаемые от сервера в ответ на запрос с заказом
+  ```typescript
+  interface IOrderResponse {
+    id: string; // - id заказа
+    total: number; // - итоговая сумма оплаты
+    }
+  ```
 
 #### Класс ProductApi
 
-Класс отвечает за отправку запросов на основные ендпойнты сервера. Реализует интерфейс IApi для композиции с классом Api **Поля:**
+Класс отвечает за отправку запросов на основные ендпойнты сервера. Реализует интерфейс IApi для композиции с классом Api 
 
-`api: IApi` - объект, содержащий методы api
+Поля:
 
-`productsUri: string` - ендпойнт ресурса со списком товаров
+- `api: IApi` - объект, содержащий методы api
 
-`orderUri: string` - ендпойнт ресурса для размещения заказа
+- `productsUri: string` - ендпойнт ресурса со списком товаров
 
-**Конструктор:**
+- `orderUri: string` - ендпойнт ресурса для размещения заказа
 
-`constructor(api: IApi)` - принимает объект, содержащий методы api (например, экземпляр класса Api)
+Конструктор:
 
-**Методы:**
+- `constructor(api: IApi)` - принимает объект, содержащий методы api (например, экземпляр класса Api)
 
-`getProducts(): Promise<IProduct[]>` - запрашивает данные со списком товаров с сервера, возвращает промис ответа сервера со списком товаров;
+Методы:
 
-`sendOrder(): Promise<IOrderResponse>` \- отправляет запрос на создание заказа. возвращает промис ответа сервера.
+- `getProducts(): Promise<IProduct[]>` - запрашивает данные со списком товаров с сервера, возвращает промис ответа сервера со списком товаров;
+
+- `sendOrder(): Promise<IOrderResponse>` \- отправляет запрос на создание заказа. возвращает промис ответа сервера.
 
 ### Слой представления
-- Компонент `Gallery` содержит множество карточек `CardCatalog` (агрегация «0..n»).
-- Компонент `Basket` содержит множество карточек `CardBasket` (агрегация «0..n»).
-- Компонент `FormOrder` использует `TogglerButtons` через композицию.
+- Компонент `GalleryView` содержит множество карточек `CardCatalogue` (агрегация «0..n»).
+- Компонент `CartView` содержит множество карточек `CardCart` (агрегация «0..n»).
+- Компонент `FormOrderView` использует `TogglerButtons` через композицию.
 - Все компоненты генерируют события (через `EventEmitter`), которые обрабатываются презентером.
+- Все компоненты наследуются от базового класса `Component<T>`, где `T` – соответствующий интерфейс данных.
 
 #### Диаграмма классов
 
@@ -399,9 +363,9 @@ interface IOrderResponse { id: string; total: number; }
   }
   ```
 
-- **ICardCatalog** – данные карточки товара в каталоге (расширяет ICardBase):
+- **ICardCatalogue** – данные карточки товара в каталоге (расширяет ICardBase):
   ```typescript
-  interface ICardCatalog extends ICardBase {
+  interface ICardCatalogue extends ICardBase {
       category: string; // категория товара
       imgUrl: string;   // URL изображения
   }
@@ -417,7 +381,7 @@ interface IOrderResponse { id: string; total: number; }
 
 - **ICardFull** – полные данные карточки товара (используется в CardPreview) наследует поля из ICardCatalog :
   ```typescript
-  interface ICardFull extends ICardCatalog {
+  interface ICardFull extends ICardCatalogue {
       description: string;       // описание товара
       buyControlSettings: ITextButton; // настройки кнопки 
   }
@@ -430,11 +394,11 @@ interface IOrderResponse { id: string; total: number; }
   }
   ```
 
-- **IBasket** – данные для компонента корзины:
+- **ICart** – данные для компонента корзины:
   ```typescript
-  interface IBasket {
+  interface ICart {
       itemList: ICardBase[]; // список товаров (базовые данные)
-      basketPrice: number;   // общая стоимость
+      cartPrice: number;   // общая стоимость
   }
   ```
 
@@ -458,162 +422,191 @@ interface IOrderResponse { id: string; total: number; }
   type TFormOrderStatus = IFormStatus & ITogglerButtons;
   ```
 
-#### Классы компонентов
-
-Все компоненты наследуются от базового класса `Component<T>`, где `T` – соответствующий интерфейс данных.
-
-#### Абстрактный класс Card&lt;T&gt;
-
-Базовый класс для всех карточек товара.
-
-**Поля:**
-- `titleElement: HTMLElement` – элемент заголовка
-- `priceElement: HTMLElement` – элемент цены
-
-**Методы:**
-- `set content(value: T): void` – абстрактный сеттер для обновления данных карточки
-
-#### Абстрактный класс CardInfo&lt;T&gt;
-
-Наследует `Card<T>` и добавляет работу с изображением и категорией.
-
-**Поля:**
-- `categoryElement: HTMLElement` – элемент категории
-- `imageElement: HTMLImageElement` – элемент изображения
-
-**Методы (защищённые):**
-- `set category(value: string): void` – устанавливает категорию
-- `set image(value: string): void` – устанавливает изображение (использует `setImage` из `Component`)
-
-
-
 #### Класс HeaderView
  – класс представления отвечающий за отображение элементов шапки сайта. Отображает счётчик товаров в корзине, обрабатывет событие клика на кнопку корзины. Наследует класс `Component<IHeader>` Принимает интерфейс `IHeader` в параметр `Т` родительского метода `render(data?: T)`
 
- **Конструктор:**
+ Конструктор:
 
 `constructor(events: IEvents, container: HTMLElement)` - принимает интерфейс брокера событий и ссылку на DOM элемент за отображение, которого он отвечает. Устанавливает ссылки в полях и обработчик, эмитирующий через полученный брокер событие `cart:open` клику на кнопку корзины.
 
-   **Поля:**
+   Поля:
    
-`cartButton: HTMLButtonElement` - ссылка на DOM элемент, соответствующий кнопке корзины в щапке сайта;
+  - `cartButton: HTMLButtonElement` - ссылка на DOM элемент, соответствующий кнопке корзины в щапке сайта;
 
-`cartCounter: HTMLElement` - - ссылка на DOM элемент, отображающий значение счетчика количества товаров в корзине.
+  - `cartCounter: HTMLElement` - - ссылка на DOM элемент, отображающий значение счетчика количества товаров в корзине.
 
-   **Сеттеры** 
+  Сеттеры:
+  - `set counter(value: IHeader)` – обновляет счётчик
 
-`set counter(value: IHeader)` – обновляет счётчик
+#### Абстрактный класс CardView&lt;T extends ICardBase&gt;
+
+Базовый класс для всех карточек товара. 
+Наследует класс `Component<ICardBase>` c интерфейсом ICardBase в переменной.
+Принимает в собственную переменную `T` тип данных, которые могут быть переданы в переопределенный метод `render` для отображения. Требует от дочерних класссов как минимум `ICardBase` в `T`.
+
+Конструктор:
+  - `constructor(container: HTMLElement)` - принимает ссылку на DOM элемент за отображение, которого он отвечает.
+
+Поля:
+  - `titleElement: HTMLElement` – элемент заголовка;
+  - `priceElement: HTMLElement` – элемент цены.
+
+Методы:
+   - `set title(value: ICardBase["title"])` - обновляет заголовок карточки;
+   - `set price(value: ICardBase["price"])` - обновляет цену в карточке;
+   - `render(data: Partial<T>): HTMLElement` - переопределяет рдительский метод `render` для приема расширенного типа данных `T`. В остальном полностью соответствует родительскому методу.
 
 
+#### Абстрактный класс CardInfoView&lt;T extends ICardInfo&gt;
 
+Наследует `Card<T>` и добавляет работу с изображением и категорией товара.
+Принимает в собственную переменную `T` тип данных, которые могут быть переданы в переопределенный метод `render` для отображения. Требует от дочерних класссов как минимум `ICardBase` в `T`.
 
-#### Класс Gallery
- – контейнер для карточек каталога.
-   - **Поля:** `catalogueElement: HTMLElement`
-   - **Сеттер:** `set catalogue(value: IGallery)` – заполняет каталог карточками `CardCatalog`
+Конструктор:
+  - `constructor(container: HTMLElement)` - принимает ссылку на DOM элемент за отображение, которого он отвечает.
 
-#### Класс Modal
-– управляет модальным окном.
-   - **Поля:** `closeElement: HTMLButtonElement`, `contentContainer: HTMLElement`
-   - **Сеттеры:** `set content(value: HTMLElement)`, `set isOpen(value: boolean)` – управляют содержимым и видимостью
+Поля:
+  - `categoryElement: HTMLElement` – ссылка на элемент категории товара
+  - `imageElement: HTMLImageElement` – ссылка на элемент изображения товара
 
-#### Класс CardCatalog
-– карточка товара в каталоге (наследует `CardInfo<ICardCatalog>`).
-   - **Поля:** `showPreviewElement: HTMLElement` – элемент для открытия предпросмотра
-   - **Сеттер:** `set content(value: ICardCatalog)` – заполняет данные карточки
+Методы:
+  - `set category(value: string)` – устанавливает категорию товара
+  - `set image({url, alt}: ICardInfo['image'])` – устанавливает ссылку и alt(при наличии) изображения (использует `setImage` из `Component`)
+  - `render(data: Partial<T>): HTMLElement` - переопределяет рдительский метод `render` для приема расширенного типа данных `T`. В остальном полностью соответствует родительскому методу.
 
-#### Класс CardPreview
+#### Класс CardCatalogueView
+– карточка товара в каталоге (наследует `CardInfo<ICardCatalogue>`).
+
+Конструктор:
+  - `constructor(container: HTMLElement)` - принимает ссылку на DOM элемент за отображение, которого он отвечает.
+
+Поля:
+   - `showPreviewElement: HTMLElement` – элемент для открытия предпросмотра
+
+Методы:
+   *Класс использует методы родителя*
+
+#### Класс CardPreviewView
 – карточка товара в режиме предпросмотра (наследует `CardInfo<ICardFull>`).
-   - **Поля:** `descriptionElement: HTMLElement`, `buyControlElement: HTMLElement`
-   - **Сеттеры:** `set description(value: string)`, `set buyControlSettings(value: ITextButton)` – управляют описанием и кнопкой
 
-#### Класс CardBasket
+   Поля:
+   - `descriptionElement: HTMLElement`,
+   - `buyControlElement: HTMLElement`
+
+   Сеттеры:
+   - `set description(value: string)`,
+   - `set buyControlSettings(value: ITextButton)` – управляют описанием и кнопкой
+
+#### Класс CardCartView
 – карточка товара в корзине (наследует `Card<ICardBase>`).
 
-   **Поля:** 
+   Поля:
+   - `indexElement: HTMLElement` – элемент номера позиции
 
-   `indexElement: HTMLElement` – элемент номера позиции
+   Сеттеры:   
+   - `set index(value: number)` – устанавливает порядковый номер товара в корзине
 
-   **Сеттер:** 
-   
-   `set index(value: number)` – устанавливает порядковый номер
 
-#### Класс Basket
+#### Класс GalleryView
+ – контейнер для карточек каталога.
+   Поля:
+   - `catalogueElement: HTMLElement` 
+
+   Сеттеры:
+   - `set catalogue(value: IGallery)` – заполняет каталог карточками `CardCatalogue`
+
+#### Класс ModalView
+– управляет модальным окном.
+
+   Поля:
+   - `closeElement: HTMLButtonElement`,
+   - `contentContainer: HTMLElement`
+
+   Сеттеры:
+   - `set content(value: HTMLElement)`,
+   - `set isOpen(value: boolean)` – управляют содержимым и видимостью
+
+
+
+#### Класс CartView
 – компонент корзины, отображает список товаров и общую стоимость.
    
-   **Поля:**
+   Поля:
 
-   `listElement: HTMLUListElement` -, 
+   - `productsList: HTMLUListElement` - ссылка на элемент DOM, принимающий товары , 
 
-   `buttonElement: HTMLButtonElement`, 
+   - `orderButton: HTMLButtonElement` - ссылка на кнопку перехода к заказу товаров в корзине, 
 
-   `priceElement: HTMLElement`
+   - `priceElement: HTMLElement` - ссылка на элемент DOM, отображающий итоговую цену заказа.
 
-   **Сеттеры:** 
-   
-   `set content(value: IBasket)` – обновляет список и стоимость
+   Сеттеры:
 
-#### Класс OrderSuccess
+  - `set items(list: HTMLElement[]);` – обновляет список товаров в корзине;
+  - `set cartPrice(total: number);` - обновляет общую стоимость;
+  - `set isCanOrder(boolean)` - управляет доступностью кнопки покупки.
+
+#### Класс OrderSuccessView
 – сообщение об успешном оформлении заказа.
-  **Поля:** 
 
-   `totalElement: HTMLElement`,
+  Поля:
 
-   `buttonElement: HTMLButtonElement`
+   - `totalElement: HTMLElement`,
 
-   **Сеттер:** 
+   - `buttonElement: HTMLButtonElement`
+
+  Сеттеры:
    
-   `set total(value: IOrderSuccess)` – устанавливает итоговую сумму
+   - `set total(value: IOrderSuccess)` – устанавливает итоговую сумму
 
-#### Класс TogglerButtons
+#### Класс TogglerButtonsView
 – компонент переключателя кнопок (например, выбор способа оплаты).
    
-   **Поля:**
+   Поля:
 
-   `buttons: HTMLButtonElement[]`,
+   - `buttons: HTMLButtonElement[]`,
 
-   `activeBtnClassName: string`
+   - `activeBtnClassName: string`
 
-   **Сеттер:**
+   Сеттеры:
    
-   `set activeBtn(value: string)` – устанавливает активность кнопок по имени
+   - `set activeBtn(value: string)` – устанавливает активность кнопок по имени
 
-#### Класс Form&lt;T&gt;
+#### Класс FormView&lt;T&gt;
 
-**Поля:**
+Поля:
 
-`submitElement: HTMLButtonElement`,
+- `submitElement: HTMLButtonElement`,
 
-`errorsElement: HTMLSpanElement`
+- `errorsElement: HTMLSpanElement`
 
-**Абстрактный сеттер:** 
+Сеттеры:
 
-`set formStatus(value: T): void` – обновляет состояние формы
+- `set formStatus(value: T): void` – обновляет состояние формы
 
-#### Класс FormOrder
+#### Класс FormOrderView
 – форма выбора способа оплаты и адреса доставки (наследует `Form<TFormOrderStatus>`). Использует `TogglerButtons` через композицию.
 
-**Поля:**
+Поля:
 
-`paymentToggler: IComponent<ITogglerButtons>` (композиция), 
+- `paymentToggler: IComponent<ITogglerButtons>` (композиция), 
 
-`addressInput: HTMLInputElement`
+- `addressInput: HTMLInputElement`
 
-**Сеттеры:**
+Сеттеры:
 
-`set paymentTogglerSettings(value: ITogglerButtons)`,
+- `set paymentTogglerSettings(value: ITogglerButtons)`,
 
-`set formStatus(value: IFormStatus)`
+- `set formStatus(value: IFormStatus)`
 
-#### Класс FormContacts
+#### Класс FormContactsView
 – форма ввода контактных данных (наследует `Form<IFormStatus>`).
 
-**Поля:**
-`emailInput: HTMLInputElement` -,
+Поля:
+- `emailInput: HTMLInputElement` -,
 
-`phoneInput: HTMLInputElement`
+- `phoneInput: HTMLInputElement`
 
-**Сеттер:** 
+Сеттер: 
 
-`set formStatus(value: IFormStatus)` – обновляет состояние формы
+- `set formStatus(value: IFormStatus)` – обновляет состояние формы
 

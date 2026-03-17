@@ -1,22 +1,22 @@
-@startuml
-!pragma layout smetana
-left to right direction
-skinparam groupInheritance 3
+@startuml Classes diagram
 
+'left to right direction
+'skinparam groupInheritance 2
 
 
 class  Component<T> <<abstract>> {
 
     # readonly container: HTMLElement
-    # setImage(HTMLImageElement, src: string, alt?: string);
+    # setImage(HTMLImageElement, src, alt?: string);
     + render(data?: Partial<T>): HTMLElement;
 }
 
-interface IComponent<T> {
+interface IComponent<T> <<interface>>{
     container: HTMLElement;
     render(data?: Partial<T>): HTMLElement;
 }
 
+IComponent -up> Component
 
 '----Хедер-----'
 interface IHeader <<interface>>{
@@ -27,126 +27,139 @@ class HeaderView extends Component {
 
     -cartButton: HTMLButtonElement;
     -cartCounter: HTMLElement;
-    set counter(value: IHeader)
+    set counter(IHeader['counter'])
 }
+
 HeaderView --> IHeader
 
-interface IGallery <<interface>>{
-    catalogue: HTMLElement[];
-}
-
-class Gallery extends Component {
-
-    -catalogueElement: HTMLElement;
-    set catalogue(IGallery);
-}
-
-Gallery --> IGallery
-
-'------Модалка---------'
-interface IModal {
-    content: HTMLElement;
-    isOpen: boolean;
-}
-
-class Modal extends Component {
-    - closeElement: HTMLButtonElement;
-    - contentContainer: HTMLElement;
-
-    set content(HTMLElement);
-    set isOpen(Boolean);
-}
-Modal --> IModal
-
 '-----Карточки------'
+'---Базовый класс---'
 interface ICardBase<<interface>> {
     title: string;
     price: string;
 }
 
-interface ICardCatalog<<interface>> extends ICardBase {
+class CardView<T> <<abstract>> extends Component {
+    #titleElement: HTMLElement;
+    #priceElement: HTMLElement;
+
+    set title(ICardBase["title"]);
+    set price(ICardBase["price"]);
+    render(data: Partial<T>);
+}
+
+interface ICardInfo<<interface>> extends ICardBase {
     category: string;
-    imgUrl: string;
+    image: {url; alt?: string}
 }
 
+
+interface ICardCatalogue <<interface>> extends ICardInfo {
+
+}
  
-class Card<T> <<abstract>> extends Component {
-    titleElement: HTMLElement;
-    priceElement: HTMLElement;
+'-----Карточка для каталога---
 
-    {abstract} set content(value: T): void;
-}
-
-class CardInfo<T> <<abstract>> extends Card {
+class CardInfoView <<abstract>> extends CardView {
     # categoryElement: HTMLElement;
     # imageElement: HTMLImageElement;
 
-    # set category(string);
-    # set image(string);
+    # set category(ICardInfo['category']);
+    # set image(ICardInfo['image']);
 }
 
-class CardCatalog extends CardInfo {
-    - showPreviewElement: HTMLElement; 
+class CardCatalogueView extends CardInfoView {
+    - showPreviewElement: HTMLElement;
 }
+
+'-----Карточка для превью---э
 
 ' @todo вынести в константы
 ' const buyButtonSettings { 
-'     BUY: { text: "Купить", disabled: false },
-'     REMOVE: {text:"Удалить из корзины", disabled: false},
-'     DISABLED: {text: "Недоступно", disabled: true}
+'     'BUY': { text: "Купить", disabled: false },
+'     'REMOVE': {text:"Удалить из корзины", disabled: false},
+'     'DISABLED': {text: "Недоступно", disabled: true}
 '   }
 
-interface ITextButton {
-    buttonText: string;
-    isDisabled: boolean;
-}
-
-interface ICardFull <<interface>> extends ICardCatalog {
+interface ICardFull<<interface>> extends ICardCatalogue {
     description: string;
-    controlSettings: ITextButton;
+    controlSettings: typeof keyof buyButtonSettings;
 }
 
-class CardPreview extends CardInfo {
+class CardPreviewView extends CardInfoView {
     - descriptionElement: HTMLElement;
     - buyControlElement: HTMLElement;
 
     - set description(string);
-    - set buyControlSettings(ITextButton);
+    - set buyControlSettings(typeof keyof buyButtonSettings);
 }
 
-class CardBasket extends Card {
+CardPreviewView --> ICardFull
+
+'---каоточка для корзины----'
+interface ICardCart<<interface>> extends ICardBase {
+    index: number;
+}
+
+class CardCartView extends CardView {
     - indexElement: HTMLElement;
     set index(number);
 }
 
-CardCatalog -> ICardCatalog
-CardBasket -> ICardBase
-CardPreview -> ICardFull
+CardCatalogueView -> ICardCatalogue
+CardCartView -> ICardBase
+CardPreviewView -> ICardFull
 
-interface IOrderSuccess <<interface>>{
-    total: number;
+
+
+'---Каталог ---`
+interface IGallery <<interface>>{
+    catalogue: HTMLElement[];
 }
 
-class OrderSuccess extends Component {
-    -totalElement: HTMLElement;
-    -buttonElement: HTMLButtonElement
-    set total(IOrderSuccess)
+class GalleryView extends Component {
+    - catalogueElement: HTMLElement;
+    set catalogue(items: HTMLElement[]);
 }
 
-OrderSuccess --> IOrderSuccess
+GalleryView --> IGallery
+
+'------Модалка---------'
+interface IModal <<interface>>{
+    content: HTMLElement;
+}
+
+class ModalView extends Component {
+    - closeElement: HTMLButtonElement;
+    - contentContainer: HTMLElement;
+    set content(HTMLElement);
+    open(): void;
+    close(): void;
+}
+
+ModalView --> IModal
 
 
-interface IBasket <<interface>>{
-    itemList: ICardBase[];
-    basketPrice: number;
+
+
+
+OrderSuccessView --> IOrderSuccess
+
+'---Корзина ---'
+interface ICart <<interface>> {
+    items: HTMLElement[];
+    cartPrice: number;
+    isCanBuy: boolean;
 }
-class Basket extends Component {
-    listElement: HTMLUlElement;
-    buttonElement: HTMLButtonElement;
-    priceElement: HTMLElement;
-    set content(IBasket);
+class CartView extends Component {
+    - productsList: HTMLUlElement;
+    - orderButton: HTMLButtonElement;
+    - priceElement: HTMLElement;
+    set items(HTMLElement[]);
+    set cartPrice(number);
+    set isCanOrder(boolean)
 }
-Basket --> IBasket
+CartView --> ICart
 
 
 '-----Кнопки----'
@@ -155,17 +168,17 @@ interface ITogglerButtons <<interface>> {
     activeBtnName: string;
 }
 
-class TogglerButtons extends Component {
+class TogglerButtonsView extends Component {
     - readonly activeBtnClassName: string;
     buttons: HTMLButtonElement[];
     set activeBtn(string);
 }
 
-TogglerButtons --> ITogglerButtons
+TogglerButtonsView --> ITogglerButtons
 
 '---Формы----'
 
-class Form<T> <<abstract>> extends Component {
+class FormView<T> <<abstract>> extends Component {
     - submitElement: HTMLButtonElement;
     -errorsElement: HTMLSpanElement;
     abstract set formStatus(T);
@@ -176,36 +189,37 @@ interface IFormStatus <<interface>> {
     errors: string[];
 }
 
-'type TFormOrderStatus  IFormStatus & ITogglerButtons
+'type TFormOrderStatus = IFormStatus & ITogglerButtons
 
-class FormOrder extends Form {
+class FormOrderView extends FormView {
     - paymentToggler: IComponent<ITogglerButtons>>
     - addressInput: HTMLInputElement;
 
     set paymentTogglerSettings(ITogglerButtons)
     set formStatus(IFormStatus)
-    render(TFormOrderStatus)
 }
 
-class FormConacts extends Form {
+class FormConactsView extends FormView {
     - emailInput: HTMLInputElement;
     - phoneInput: HTMLInputElement;
 
     set formStatus(IFormStatus)
 }
 
-FormOrder --> IFormOrderStatus
-FormConacts --> IFormStatus
+'----заказ--'
+interface IOrderSuccess <<interface>>{
+    total: number;
+}
 
+class OrderSuccessView extends Component {
+    -totalElement: HTMLElement;
+    -buttonElement: HTMLButtonElement
+    set total(IOrderSuccess)
+}
+'FormOrderView --> IFormOrderStatus'
+'FormConactsView --> IFormStatus'
 
-Gallery "n" o-- "0..n" CardCatalog
-Basket "n" o-- "0..n" CardBasket
-
-
-
-
-
-
+hide <<interface>>
 hide class circle
 hide interface circle
 @enduml
