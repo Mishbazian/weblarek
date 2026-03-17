@@ -6,13 +6,11 @@ interface IModal {
 }
 
 export class ModalView extends Component<IModal> {
-    private closeBtn: HTMLButtonElement;
+    private closeButton: HTMLButtonElement;
     private contentContainer: HTMLElement;
-    constructor() {
-        const container: HTMLElement | null =
-            document.querySelector("#modal-container");
+    constructor(container: HTMLElement) {
         super(container as HTMLElement);
-        this.closeBtn = ensureElement<HTMLButtonElement>(
+        this.closeButton = ensureElement<HTMLButtonElement>(
             ".modal__close",
             this.container,
         );
@@ -23,8 +21,7 @@ export class ModalView extends Component<IModal> {
         this.contentContainer.replaceChildren(item);
     }
     private handleClick(e: Event) {
-        console.log(e.target);
-        if (e.target === e.currentTarget || e.target === this.closeBtn)
+        if (e.target === e.currentTarget || e.target === this.closeButton)
             this.close();
     }
     open() {

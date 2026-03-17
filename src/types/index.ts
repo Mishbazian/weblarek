@@ -57,7 +57,6 @@ export interface IHeader {
     counter: number;
 }
 
-
 export interface ICardBase {
     title: string;
     price: string;
@@ -68,22 +67,23 @@ export interface ICardInfo extends ICardBase {
     image: {
         url: string;
         alt?: string;
-    }
+    };
 }
 
 export interface ICardCatalogue extends ICardInfo {
-
+    //здесь можно раширить тип данных принимаемых render() в CardCatalogueView
 }
 
 export interface ICardCart extends ICardBase {
     index: number;
 }
+export type controlState = { text: string; disabled: boolean }
 
 export interface ICardPreview extends ICardInfo {
     descrition: string;
+    orderButtonState: controlState;
 }
 
 export interface ICardProduct extends ICardPreview {
-    id: string
+    id: string;
 }
-

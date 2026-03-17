@@ -4,9 +4,8 @@ import { CardView } from "./CardView";
 
 export class CardCartView extends CardView<ICardCart> {
     private indexElement: HTMLElement;
-    constructor() {        
-        const cardContainer = cloneTemplate("#card-basket");
-        super(cardContainer);
+    constructor(container: HTMLElement) {        
+        super(container);
         this.indexElement = ensureElement('.basket__item-index', this.container)
     }
     set index(value: number){

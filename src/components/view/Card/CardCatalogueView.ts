@@ -5,9 +5,8 @@ import { CardInfoView } from "./CardInfoView";
 
 export class CardCatalogueView extends CardInfoView<ICardInfo> {
     private showPreviewElement: HTMLElement;
-    constructor() {
-        const cardContainer = cloneTemplate("#card-catalog");
-        super(cardContainer);
+    constructor(container: HTMLElement) {
+        super(container);
         this.showPreviewElement = this.container;
         this.showPreviewElement.addEventListener("click", () => {
             //todo 

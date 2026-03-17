@@ -11,9 +11,8 @@ export class CartView extends Component<ICart> {
     private productsList: HTMLUListElement;
     private orderButton: HTMLButtonElement;
     private priceElement: HTMLElement;
-    constructor() {
-        const cardContainer = cloneTemplate("#basket");
-        super(cardContainer);
+    constructor(container: HTMLElement) {
+        super(container);
         this.productsList = ensureElement<HTMLUListElement>(
             ".basket__list",
             this.container,
