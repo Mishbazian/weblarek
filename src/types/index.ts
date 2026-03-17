@@ -56,3 +56,34 @@ export interface IOrderResponse {
 export interface IHeader {
     counter: number;
 }
+
+
+export interface ICardBase {
+    title: string;
+    price: string;
+}
+
+export interface ICardInfo extends ICardBase {
+    category: string;
+    image: {
+        url: string;
+        alt?: string;
+    }
+}
+
+export interface ICardCatalogue extends ICardInfo {
+
+}
+
+export interface ICardCart extends ICardBase {
+    index: number;
+}
+
+export interface ICardPreview extends ICardInfo {
+    descrition: string;
+}
+
+export interface ICardProduct extends ICardPreview {
+    id: string
+}
+
