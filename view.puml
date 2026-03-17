@@ -1,225 +1,199 @@
-@startuml Classes diagram
+@startuml View Classes diagram
 
-'left to right direction
-'skinparam groupInheritance 2
+left to right direction
+skinparam groupInheritance 2
+skinparam nodesep 10
+skinparam ranksep 20
 
 
-class  Component<T> <<abstract>> {
-
-    # readonly container: HTMLElement
-    # setImage(HTMLImageElement, src, alt?: string);
-    + render(data?: Partial<T>): HTMLElement;
+abstract class Component<T> {
+  # container: HTMLElement
+  # setImage(element: HTMLImageElement, src: string, alt?: string): void
+  + render(data?: Partial<T>): HTMLElement
 }
-
-interface IComponent<T> <<interface>>{
-    container: HTMLElement;
-    render(data?: Partial<T>): HTMLElement;
-}
-
-IComponent -up> Component
 
 '----Хедер-----'
-interface IHeader <<interface>>{
-    counter: number;
+interface IHeader {
+  counter: number
 }
 
 class HeaderView extends Component {
-
-    -cartButton: HTMLButtonElement;
-    -cartCounter: HTMLElement;
-    set counter(IHeader['counter'])
+  -cartButton: HTMLButtonElement
+  -cartCounter: HTMLElement
+  + set counter(value: number)
 }
 
 HeaderView --> IHeader
 
 '-----Карточки------'
 '---Базовый класс---'
-interface ICardBase<<interface>> {
-    title: string;
-    price: string;
+interface ICardBase {
+  title: string
+  price: string
 }
 
-class CardView<T> <<abstract>> extends Component {
-    #titleElement: HTMLElement;
-    #priceElement: HTMLElement;
+abstract class CardView<T extends ICardBase> extends Component {
+  #titleElement: HTMLElement
+  #priceElement: HTMLElement
 
-    set title(ICardBase["title"]);
-    set price(ICardBase["price"]);
-    render(data: Partial<T>);
-}
-
-interface ICardInfo<<interface>> extends ICardBase {
-    category: string;
-    image: {url; alt?: string}
+  + set title(value: ICardBase["title"])
+  + set price(value: ICardBase["price"])
+  + render(data: Partial<T>): HTMLElement
 }
 
 
-interface ICardCatalogue <<interface>> extends ICardInfo {
-
+interface ICardInfo extends ICardBase {
+  category: string
+  image: { url: string; alt?: string }
 }
- 
-'-----Карточка для каталога---
 
-class CardInfoView <<abstract>> extends CardView {
-    # categoryElement: HTMLElement;
-    # imageElement: HTMLImageElement;
+interface ICardCatalogue extends ICardInfo {
+  // расширение для каталога
+}
 
-    # set category(ICardInfo['category']);
-    # set image(ICardInfo['image']);
+'-----Карточка для каталога---'
+
+abstract class CardInfoView<T extends ICardInfo> extends CardView {
+  #categoryElement: HTMLElement
+  #imageElement: HTMLImageElement
+
+  # set category(value: ICardInfo['category'])
+  # set image(value: ICardInfo['image'])
 }
 
 class CardCatalogueView extends CardInfoView {
-    - showPreviewElement: HTMLElement;
+  -showPreviewElement: HTMLElement
 }
 
-'-----Карточка для превью---э
+'-----Карточка для превью---'
 
-' @todo вынести в константы
-' const buyButtonSettings { 
-'     'BUY': { text: "Купить", disabled: false },
-'     'REMOVE': {text:"Удалить из корзины", disabled: false},
-'     'DISABLED': {text: "Недоступно", disabled: true}
-'   }
+'type controlState = { text: string; disabled: boolean }'
 
-interface ICardFull<<interface>> extends ICardCatalogue {
-    description: string;
-    controlSettings: typeof keyof buyButtonSettings;
+interface ICardPreview extends ICardInfo {
+  description: string
+  orderButtonState: controlState
 }
 
 class CardPreviewView extends CardInfoView {
-    - descriptionElement: HTMLElement;
-    - buyControlElement: HTMLElement;
+  -descriptionElement: HTMLElement
+  -orderButton: HTMLButtonElement
 
-    - set description(string);
-    - set buyControlSettings(typeof keyof buyButtonSettings);
+  + set description(value: string)
+  + set orderButtonState(value: controlState)
 }
 
-CardPreviewView --> ICardFull
+CardPreviewView --> ICardPreview
 
-'---каоточка для корзины----'
-interface ICardCart<<interface>> extends ICardBase {
-    index: number;
+'---Карточка для корзины----'
+interface ICardCart extends ICardBase {
+  index: number
 }
 
 class CardCartView extends CardView {
-    - indexElement: HTMLElement;
-    set index(number);
+  -indexElement: HTMLElement
+  + set index(value: number)
 }
 
-CardCatalogueView -> ICardCatalogue
-CardCartView -> ICardBase
-CardPreviewView -> ICardFull
+CardCatalogueView --> ICardCatalogue
+CardCartView --> ICardCart
 
-
-
-'---Каталог ---`
-interface IGallery <<interface>>{
-    catalogue: HTMLElement[];
+'---Каталог ---'
+interface IGallery {
+  catalogue: HTMLElement[]
 }
 
 class GalleryView extends Component {
-    - catalogueElement: HTMLElement;
-    set catalogue(items: HTMLElement[]);
+  -catalogueElement: HTMLElement
+  + set catalogue(items: HTMLElement[])
 }
 
 GalleryView --> IGallery
 
 '------Модалка---------'
-interface IModal <<interface>>{
-    content: HTMLElement;
+interface IModal {
+  content: HTMLElement
 }
 
 class ModalView extends Component {
-    - closeElement: HTMLButtonElement;
-    - contentContainer: HTMLElement;
-    set content(HTMLElement);
-    open(): void;
-    close(): void;
+  -closeButton: HTMLButtonElement
+  -contentContainer: HTMLElement
+  + set content(item: HTMLElement)
+  + open(): void
+  + close(): void
 }
 
 ModalView --> IModal
 
-
-
-
-
-OrderSuccessView --> IOrderSuccess
-
 '---Корзина ---'
-interface ICart <<interface>> {
-    items: HTMLElement[];
-    cartPrice: number;
-    isCanBuy: boolean;
+interface ICart {
+  products: HTMLElement[]
+  cartPrice: number
+  isCanOrder: boolean
 }
+
 class CartView extends Component {
-    - productsList: HTMLUlElement;
-    - orderButton: HTMLButtonElement;
-    - priceElement: HTMLElement;
-    set items(HTMLElement[]);
-    set cartPrice(number);
-    set isCanOrder(boolean)
+  -productsList: HTMLUListElement
+  -orderButton: HTMLButtonElement
+  -priceElement: HTMLElement
+  + set products(items: HTMLElement[])
+  + set cartPrice(value: number)
+  + set isCanOrder(value: boolean)
 }
+
 CartView --> ICart
 
-
 '-----Кнопки----'
-
-interface ITogglerButtons <<interface>> {
-    activeBtnName: string;
+interface ITogglerButtons {
+  activeBtnName: string
 }
 
 class TogglerButtonsView extends Component {
-    - readonly activeBtnClassName: string;
-    buttons: HTMLButtonElement[];
-    set activeBtn(string);
+  -readonly activeBtnClassName: string
+  -buttons: HTMLButtonElement[]
+  + set activeBtn(value: string)
 }
 
 TogglerButtonsView --> ITogglerButtons
 
 '---Формы----'
-
-class FormView<T> <<abstract>> extends Component {
-    - submitElement: HTMLButtonElement;
-    -errorsElement: HTMLSpanElement;
-    abstract set formStatus(T);
+interface IFormStatus {
+  submitDisabled: boolean
+  errors: string[]
 }
 
-interface IFormStatus <<interface>> {
-    submitDisabled: boolean;
-    errors: string[];
+abstract class FormView<T> extends Component {
+  #submitBtn: HTMLButtonElement
+  #errorsElement: HTMLElement
+  abstract set formStatus(value: T)
 }
-
-'type TFormOrderStatus = IFormStatus & ITogglerButtons
 
 class FormOrderView extends FormView {
-    - paymentToggler: IComponent<ITogglerButtons>>
-    - addressInput: HTMLInputElement;
-
-    set paymentTogglerSettings(ITogglerButtons)
-    set formStatus(IFormStatus)
+  -paymentToggler: IComponent<ITogglerButtons>
+  -addressInput: HTMLInputElement
+  + set paymentTogglerSettings(value: ITogglerButtons)
+  + set formStatus(value: IFormStatus)
 }
 
-class FormConactsView extends FormView {
-    - emailInput: HTMLInputElement;
-    - phoneInput: HTMLInputElement;
-
-    set formStatus(IFormStatus)
+class FormContactsView extends FormView {
+  -emailInput: HTMLInputElement
+  -phoneInput: HTMLInputElement
+  + set formStatus(value: IFormStatus)
 }
 
-'----заказ--'
-interface IOrderSuccess <<interface>>{
-    total: number;
+'----Заказ успешен--'
+interface IOrderSuccess {
+  total: number
 }
 
 class OrderSuccessView extends Component {
-    -totalElement: HTMLElement;
-    -buttonElement: HTMLButtonElement
-    set total(IOrderSuccess)
+  -totalElement: HTMLElement
+  -buttonElement: HTMLButtonElement
+  + set total(value: number)
 }
-'FormOrderView --> IFormOrderStatus'
-'FormConactsView --> IFormStatus'
 
-hide <<interface>>
-hide class circle
-hide interface circle
+OrderSuccessView --> IOrderSuccess
+
+'hide <<interface>>
+'hide class circle
+'hide interface circle
 @enduml
