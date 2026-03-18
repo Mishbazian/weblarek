@@ -1,11 +1,9 @@
-import { ICardInfo } from "../../../types";
+import { TCardExt } from "../../../types";
 import { categoryMap } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
 import { CardView } from "./CardView";
 
-export abstract class CardInfoView<
-    T extends ICardInfo,
-> extends CardView<ICardInfo> {
+export abstract class CardExtView<T> extends CardView<TCardExt & T> {
     protected categoryElement: HTMLElement;
     protected imageElement: HTMLImageElement;
 
@@ -18,7 +16,7 @@ export abstract class CardInfoView<
         );
     }
 
-    set category(value: ICardInfo["category"]) {
+    set category(value: string) {
         this.categoryElement.textContent = value;
         for (const key in categoryMap) {
             const mapValue: string =
@@ -26,11 +24,7 @@ export abstract class CardInfoView<
             this.categoryElement.classList.toggle(mapValue, key === value);
         }
     }
-    set image({ url, alt }: ICardInfo["image"]) {
+    set image({ url, alt }: TCardExt["image"]) {
         this.setImage(this.imageElement, url, alt);
-    }
-
-    render(data: Partial<T>) {
-        return super.render(data);
     }
 }

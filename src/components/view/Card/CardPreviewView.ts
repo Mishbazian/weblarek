@@ -1,8 +1,8 @@
-import { controlState, ICardPreview } from "../../../types";
-import { cloneTemplate, ensureElement } from "../../../utils/utils";
-import { CardInfoView } from "./CardInfoView";
+import { controlState, TCardPreview } from "../../../types";
+import { ensureElement } from "../../../utils/utils";
+import { CardExtView } from "./CardExtView";
 
-export class CardPreviewView extends CardInfoView<ICardPreview> {
+export class CardPreviewView extends CardExtView<TCardPreview> {
     private descriptionElement: HTMLElement;
     private orderButton: HTMLButtonElement;
     constructor(container: HTMLElement) {
@@ -20,7 +20,7 @@ export class CardPreviewView extends CardInfoView<ICardPreview> {
         this.descriptionElement.textContent = value;
     }
 
-    set orderButtonState({ text, disabled}:controlState) {
+    set orderButtonState({ text, disabled }: controlState) {
         this.orderButton.disabled = disabled;
         this.orderButton.textContent = text;
     }

@@ -56,34 +56,26 @@ export interface IOrderResponse {
 export interface IHeader {
     counter: number;
 }
-
-export interface ICardBase {
+export interface ICardProduct {
+    id: string;
     title: string;
     price: string;
-}
-
-export interface ICardInfo extends ICardBase {
     category: string;
     image: {
         url: string;
         alt?: string;
     };
+    description: string;
 }
 
-export interface ICardCatalogue extends ICardInfo {
-    //здесь можно раширить тип данных принимаемых render() в CardCatalogueView
-}
+export type TCardBase = Pick<ICardProduct, "title" | "price">
+export type TCardExt = Pick<ICardProduct, "image" | "category">
 
-export interface ICardCart extends ICardBase {
+export type TCardInfo = Pick<ICardProduct, "description">
+export type TCardCart = TCardBase & {
     index: number;
 }
-export type controlState = { text: string; disabled: boolean }
-
-export interface ICardPreview extends ICardInfo {
-    descrition: string;
-    orderButtonState: controlState;
-}
-
-export interface ICardProduct extends ICardPreview {
-    id: string;
+export type TControlState = { text: string; disabled: boolean }
+export type TCardPreview = TCardInfo & {
+    orderButtonState: TControlState;
 }

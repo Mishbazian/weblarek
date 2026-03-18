@@ -1,15 +1,13 @@
 import { ICardInfo } from "../../../types";
-import { cloneTemplate } from "../../../utils/utils";
-import { CardInfoView } from "./CardInfoView";
+import { CardExtView } from "./CardExtView";
 
-
-export class CardCatalogueView extends CardInfoView<ICardInfo> {
+export class CardCatalogueView extends CardExtView<never> {
     private showPreviewElement: HTMLElement;
     constructor(container: HTMLElement) {
         super(container);
         this.showPreviewElement = this.container;
         this.showPreviewElement.addEventListener("click", () => {
-            //todo 
+            //todo
         });
     }
 }

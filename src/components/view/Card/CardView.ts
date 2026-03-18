@@ -1,9 +1,8 @@
-import { ICardBase} from "../../../types";
-
+import { TCardBase } from "../../../types";
 import { ensureElement } from "../../../utils/utils";
 import { Component } from "../../base/Component";
 
-export abstract class CardView<T extends ICardBase> extends Component<ICardBase> {
+export abstract class CardView<T> extends Component<TCardBase & T> {
     protected titleElement: HTMLElement;
     protected priceElement: HTMLElement;
 
@@ -19,23 +18,11 @@ export abstract class CardView<T extends ICardBase> extends Component<ICardBase>
         );
     }
 
-    set title(value: ICardBase["title"]) {
+    set title(value: string) {
         this.titleElement.textContent = value;
     }
 
-    set price(value: ICardBase["price"]) {
-        this.priceElement.textContent = value.toString();
-    }
-
-
-    render(data: Partial<T>): HTMLElement {
-        return super.render(data);
+    set price(value: string) {
+        this.priceElement.textContent = value;
     }
 }
-
-
- 
-
-
-
-

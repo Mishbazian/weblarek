@@ -1,7 +1,7 @@
-@startuml View Classes diagram
+@startuml ViewClassesDiagram
 
 left to right direction
-skinparam groupInheritance 2
+'skinparam groupInheritance 2
 skinparam nodesep 10
 skinparam ranksep 20
 
@@ -13,106 +13,66 @@ abstract class Component<T> {
 }
 
 '----Хедер-----'
-interface IHeader {
-  counter: number
-}
-
 class HeaderView extends Component {
   -cartButton: HTMLButtonElement
   -cartCounter: HTMLElement
   + set counter(value: number)
 }
 
-HeaderView --> IHeader
 
 '-----Карточки------'
 '---Базовый класс---'
-interface ICardBase {
-  title: string
-  price: string
-}
 
-abstract class CardView<T extends ICardBase> extends Component {
+abstract class CardView<T> extends Component {
   #titleElement: HTMLElement
   #priceElement: HTMLElement
 
   + set title(value: ICardBase["title"])
   + set price(value: ICardBase["price"])
-  + render(data: Partial<T>): HTMLElement
-}
-
-
-interface ICardInfo extends ICardBase {
-  category: string
-  image: { url: string; alt?: string }
-}
-
-interface ICardCatalogue extends ICardInfo {
-  // расширение для каталога
 }
 
 '-----Карточка для каталога---'
 
-abstract class CardInfoView<T extends ICardInfo> extends CardView {
+abstract class CardExtView<T> extends CardView {
   #categoryElement: HTMLElement
   #imageElement: HTMLImageElement
 
-  # set category(value: ICardInfo['category'])
-  # set image(value: ICardInfo['image'])
+  + set category(value: ICardInfo['category'])
+  + set image(value: ICardInfo['image'])
 }
 
-class CardCatalogueView extends CardInfoView {
+class CardCatalogueView extends CardExtView {
   -showPreviewElement: HTMLElement
 }
 
 '-----Карточка для превью---'
 
-'type controlState = { text: string; disabled: boolean }'
 
-interface ICardPreview extends ICardInfo {
-  description: string
-  orderButtonState: controlState
-}
-
-class CardPreviewView extends CardInfoView {
+class CardPreviewView extends CardExtView {
   -descriptionElement: HTMLElement
   -orderButton: HTMLButtonElement
 
-  + set description(value: string)
-  + set orderButtonState(value: controlState)
+  + set description(string)
+  + set orderButtonState({ text: string; disabled: boolean })
 }
 
-CardPreviewView --> ICardPreview
 
 '---Карточка для корзины----'
-interface ICardCart extends ICardBase {
-  index: number
-}
-
 class CardCartView extends CardView {
   -indexElement: HTMLElement
   + set index(value: number)
 }
 
-CardCatalogueView --> ICardCatalogue
-CardCartView --> ICardCart
-
 '---Каталог ---'
-interface IGallery {
-  catalogue: HTMLElement[]
-}
 
 class GalleryView extends Component {
   -catalogueElement: HTMLElement
   + set catalogue(items: HTMLElement[])
 }
 
-GalleryView --> IGallery
+
 
 '------Модалка---------'
-interface IModal {
-  content: HTMLElement
-}
 
 class ModalView extends Component {
   -closeButton: HTMLButtonElement
@@ -122,14 +82,9 @@ class ModalView extends Component {
   + close(): void
 }
 
-ModalView --> IModal
+
 
 '---Корзина ---'
-interface ICart {
-  products: HTMLElement[]
-  cartPrice: number
-  isCanOrder: boolean
-}
 
 class CartView extends Component {
   -productsList: HTMLUListElement
@@ -140,12 +95,7 @@ class CartView extends Component {
   + set isCanOrder(value: boolean)
 }
 
-CartView --> ICart
-
 '-----Кнопки----'
-interface ITogglerButtons {
-  activeBtnName: string
-}
 
 class TogglerButtonsView extends Component {
   -readonly activeBtnClassName: string
@@ -156,10 +106,6 @@ class TogglerButtonsView extends Component {
 TogglerButtonsView --> ITogglerButtons
 
 '---Формы----'
-interface IFormStatus {
-  submitDisabled: boolean
-  errors: string[]
-}
 
 abstract class FormView<T> extends Component {
   #submitBtn: HTMLButtonElement
@@ -181,9 +127,6 @@ class FormContactsView extends FormView {
 }
 
 '----Заказ успешен--'
-interface IOrderSuccess {
-  total: number
-}
 
 class OrderSuccessView extends Component {
   -totalElement: HTMLElement
@@ -191,7 +134,7 @@ class OrderSuccessView extends Component {
   + set total(value: number)
 }
 
-OrderSuccessView --> IOrderSuccess
+
 
 'hide <<interface>>
 'hide class circle
