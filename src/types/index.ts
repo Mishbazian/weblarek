@@ -9,7 +9,7 @@ export interface IApi {
     ): Promise<T>;
 }
 
-export type TPayment = "Cash" | "Online" | "";
+export type TPayment = "cash" | "online" | "";
 
 export interface IProduct {
     id: string;
@@ -79,3 +79,15 @@ export type TControlState = { text: string; disabled: boolean }
 export type TCardPreview = TCardInfo & {
     orderButtonState: TControlState;
 }
+
+export type TFormStatus = {
+    isSubmitDisabled: boolean;
+    error: string;
+}
+
+
+export type TOrderPayment = "cash" | "card" | "";
+
+export type TFormPayment = {
+    payment: TOrderPayment;
+};

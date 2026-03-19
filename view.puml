@@ -1,9 +1,9 @@
 @startuml ViewClassesDiagram
 
-left to right direction
+'left to right direction
 'skinparam groupInheritance 2
-skinparam nodesep 10
-skinparam ranksep 20
+' skinparam nodesep 20
+'skinparam ranksep 20
 
 
 abstract class Component<T> {
@@ -13,12 +13,30 @@ abstract class Component<T> {
 }
 
 '----Хедер-----'
-class HeaderView extends Component {
+class HeaderView {
   -cartButton: HTMLButtonElement
   -cartCounter: HTMLElement
   + set counter(value: number)
 }
+HeaderView -left-|> Component
 
+'---Каталог ---'
+
+class GalleryView {
+  -catalogueElement: HTMLElement
+  + set catalogue(items: HTMLElement[])
+}
+GalleryView -right-|> Component
+
+'------Модалка---------'
+
+class ModalView extends Component {
+  -closeButton: HTMLButtonElement
+  -contentContainer: HTMLElement
+  + set content(item: HTMLElement)
+  + open(): void
+  + close(): void
+}
 
 '-----Карточки------'
 '---Базовый класс---'
@@ -27,8 +45,8 @@ abstract class CardView<T> extends Component {
   #titleElement: HTMLElement
   #priceElement: HTMLElement
 
-  + set title(value: ICardBase["title"])
-  + set price(value: ICardBase["price"])
+  + set title(string)
+  + set price(string)
 }
 
 '-----Карточка для каталога---'
@@ -37,8 +55,8 @@ abstract class CardExtView<T> extends CardView {
   #categoryElement: HTMLElement
   #imageElement: HTMLImageElement
 
-  + set category(value: ICardInfo['category'])
-  + set image(value: ICardInfo['image'])
+  + set category(string)
+  + set image({ url, alt: string })
 }
 
 class CardCatalogueView extends CardExtView {
@@ -63,24 +81,11 @@ class CardCartView extends CardView {
   + set index(value: number)
 }
 
-'---Каталог ---'
-
-class GalleryView extends Component {
-  -catalogueElement: HTMLElement
-  + set catalogue(items: HTMLElement[])
-}
 
 
 
-'------Модалка---------'
 
-class ModalView extends Component {
-  -closeButton: HTMLButtonElement
-  -contentContainer: HTMLElement
-  + set content(item: HTMLElement)
-  + open(): void
-  + close(): void
-}
+
 
 
 
@@ -97,41 +102,46 @@ class CartView extends Component {
 
 '-----Кнопки----'
 
-class TogglerButtonsView extends Component {
-  -readonly activeBtnClassName: string
-  -buttons: HTMLButtonElement[]
-  + set activeBtn(value: string)
+class FormTogglerButtons {
+  -container: HTMLElement;
+  +controls: HTMLButtonElement[];
+  +input: HTMLInputElement;
+  +set activeButton(string);
 }
 
-TogglerButtonsView --> ITogglerButtons
+interface IFormToggler {
+  controls: HTMLButtonElement[];
+  input: HTMLInputElement;
+  set activeButton(value: string);
+}
+
+FormTogglerButtons -left-> IFormToggler
 
 '---Формы----'
 
 abstract class FormView<T> extends Component {
-  #submitBtn: HTMLButtonElement
-  #errorsElement: HTMLElement
-  abstract set formStatus(value: T)
+  #form: HTMLFormElement;
+  #submitButton: HTMLButtonElement;
+  #errorsElement: HTMLElement;
+  +set isSubmitDisabled(boolean)
+  +set errors(string)
 }
 
 class FormOrderView extends FormView {
-  -paymentToggler: IComponent<ITogglerButtons>
-  -addressInput: HTMLInputElement
-  + set paymentTogglerSettings(value: ITogglerButtons)
-  + set formStatus(value: IFormStatus)
+  -paymentToggler: IFormToggler
+  + set payment(string)
 }
 
+FormOrderView o.."1" IFormToggler
+
 class FormContactsView extends FormView {
-  -emailInput: HTMLInputElement
-  -phoneInput: HTMLInputElement
-  + set formStatus(value: IFormStatus)
 }
 
 '----Заказ успешен--'
 
 class OrderSuccessView extends Component {
   -totalElement: HTMLElement
-  -buttonElement: HTMLButtonElement
-  + set total(value: number)
+  + set total(string)
 }
 
 
