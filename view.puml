@@ -81,14 +81,6 @@ class CardCartView extends CardView {
   + set index(value: number)
 }
 
-
-
-
-
-
-
-
-
 '---Корзина ---'
 
 class CartView extends Component {
@@ -102,7 +94,7 @@ class CartView extends Component {
 
 '-----Кнопки----'
 
-class FormTogglerButtons {
+class FormTogglerButtons implements IFormToggler{
   -container: HTMLElement;
   +controls: HTMLButtonElement[];
   +input: HTMLInputElement;
@@ -115,7 +107,7 @@ interface IFormToggler {
   set activeButton(value: string);
 }
 
-FormTogglerButtons -left-> IFormToggler
+' FormTogglerButtons -left-> IFormToggler
 
 '---Формы----'
 
