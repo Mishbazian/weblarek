@@ -33,7 +33,7 @@ export class CardPreviewView extends CardExtView<TCardPreview> {
     }
 // установить состояние кнопки. Здесь определяется какое действие с товаром доступно пользователю.
     set state(state: TOrderButtonState) {
-        this.orderButton.disabled = state === cardActions.disabled;
+        this.orderButton.disabled = state === "disabled";
         this.orderButton.textContent = cardActions[state];
     }
 }
