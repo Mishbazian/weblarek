@@ -1,13 +1,16 @@
-import { ICardInfo } from "../../../types";
+import { TCardActions } from "../../../types";
 import { CardExtView } from "./CardExtView";
-
-export class CardCatalogueView extends CardExtView<never> {
-    private showPreviewElement: HTMLElement;
-    constructor(container: HTMLElement) {
+/**
+ * Карточка товара в каталоге. Добавляет родительскому классу генерацию событий.
+ */
+export class CardCatalogueView extends CardExtView<void> {
+    /**
+     * @constructor создает экземпляр карточки и устанавливает обработчик события клика.
+     * @param {HTMLElement} container - DOM элемент, содержащий структуру карточки
+     * @param {object} actions - объект, содержащий коллбэк-функцию для обработки событий.
+     */
+    constructor(container: HTMLElement, actions: TCardActions) {
         super(container);
-        this.showPreviewElement = this.container;
-        this.showPreviewElement.addEventListener("click", () => {
-            //todo
-        });
+        this.container.addEventListener('click', actions.onClick)
     }
 }
