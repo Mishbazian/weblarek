@@ -136,7 +136,13 @@ class OrderSuccessView extends Component {
   + set total(string)
 }
 
+interface IEvents {
+    on(EventName, (T) => void): void;
+    emit(string, T): void;
+    trigger(string, context?): (data: T) => void;
+}
 
+ModalView o.."1" IEvents
 
 'hide <<interface>>
 'hide class circle
