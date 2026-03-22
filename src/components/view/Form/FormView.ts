@@ -1,14 +1,20 @@
-import { TFormStatus } from "../../../types";
-import {
-    ensureElement,
-} from "../../../utils/utils";
+import { TFormActions, TFormStatus } from "../../../types";
+import { ensureElement } from "../../../utils/utils";
 import { Component } from "../../base/Component";
 
+/**
+ * Базовый класс для отображения форм. Расширяет Component. Эмитирует браузерные события change и submit с данными формы через полученный в конструкторе интерфейс брокера сообщений и выводит сообщения об ошибках.
+ */
 export abstract class FormView<T> extends Component<TFormStatus & T> {
     protected form: HTMLFormElement;
     protected submitButton: HTMLButtonElement;
     protected errorsElement: HTMLElement;
-    constructor(container: HTMLElement) {
+    /**
+     * @constructor создает экземпляр формы
+     * @param {HTMLElement} container - контейнер содержащий форму
+     * @param {TFormActions} actions -  объект, содержащий коллбэк-функции для обработки событий.
+     */
+    constructor(container: HTMLElement, actions: TFormActions) {
         super(container);
 
         this.submitButton = ensureElement<HTMLButtonElement>(
@@ -18,23 +24,14 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
         this.errorsElement = ensureElement(".form__errors", this.container);
         this.form = this.container as HTMLFormElement;
 
-        this.form.addEventListener("change", () => {
-            const formData = new FormData(this.form);
-            console.log("change");
-            for (const [name, value] of formData.entries()) {
-                console.log(name, value);
-            }
-        });
+        this.form.addEventListener("change", (e) => actions.onChange(e));
 
         this.form.addEventListener("submit", (e) => {
             e.preventDefault();
-            console.log("submit");
-            const formData = new FormData(this.form);
-            for (const [name, value] of formData.entries()) {
-                console.log(name, value);
-            }
+            actions.onSubmit(e);
         });
     }
+
     set isSubmitDisabled(value: boolean) {
         this.submitButton.disabled = value;
     }
@@ -43,14 +40,3 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
         this.errorsElement.textContent = message;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
