@@ -4,6 +4,7 @@ import {
     TValidationRules,
 } from "../../types";
 import { isFilledString } from "../../utils/utils";
+import { IEvents } from "../base/Events";
 
 export class Buyer {
     private data: IBuyer = {
@@ -30,9 +31,12 @@ export class Buyer {
             message: "Необходимо укаазать адрес",
         },
     };
+    constructor(private events: IEvents) {}
 
     setData(fields: Partial<IBuyer>): void {
         Object.assign(this.data, fields);
+        this.events.emit("buyer:update", this.getData());
+        this.notify()
     }
 
     getData(): IBuyer {
@@ -40,8 +44,9 @@ export class Buyer {
     }
 
     clearData(): void {
-        const freshBuyer = new Buyer();
+        const freshBuyer = new Buyer(this.events);
         Object.assign(this.data, freshBuyer.data);
+        this.notify()
     }
 
     validateData(): Partial<TValidationErrorMessages<IBuyer>> {
@@ -54,5 +59,9 @@ export class Buyer {
             },
         );
         return res;
+    }
+
+    private notify() {
+        this.events.emit("model:buyer:update", this.data );
     }
 }
