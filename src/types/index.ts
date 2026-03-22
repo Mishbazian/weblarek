@@ -123,11 +123,18 @@ export type TEventHandle = (event: Event) => void;
 export type TActions = Record<TStandardEvents, TEventHandle>;
 
 /**
- * Тип объекта с обработчиком события "onClick"
+ * Тип объекта с обработчикaми события для карточки
  */
 export type TCardActions = Pick<TActions, "onClick">;
 
+/**
+ * Тип объекта с обработчикaми событий для формы
+ */
 export type TFormActions = Pick<TActions, "onChange" | "onSubmit">
+/**
+ * Тип объекта с обработчикaми события для окна успешного заказа
+ */
+export type TOrderSuccessActions = Pick<TActions, "onClick">;
 /**
  * Тип данных для рендера модального окна
  */
@@ -148,4 +155,7 @@ export type TFormPayment = {
     payment: TOrderPayment;
 };
 
+export type TOrderSuccess = {
+    total: string;
+};
 
