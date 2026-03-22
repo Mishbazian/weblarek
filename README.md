@@ -453,7 +453,7 @@ protected constructor(
 
 Сеттеры:
 
-- `set catalogue(value: IGallery)` – заполняет каталог предоставленными карточками
+- `set catalogue(items: HTMLElement[])` – заполняет каталог предоставленными карточками
 
 #### Класс ModalView
 

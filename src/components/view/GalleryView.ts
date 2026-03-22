@@ -1,9 +1,10 @@
+import { TGallery } from "../../types";
 import { Component } from "../base/Component";
 
-interface IGallery {
-    catalogue: HTMLElement[];
-}
-export class GalleryView extends Component<IGallery> {
+/**
+ * контейнер для карточек каталога.
+ */
+export class GalleryView extends Component<TGallery> {
     private catalogueElement;
 
     constructor(container: HTMLElement) {
@@ -11,7 +12,7 @@ export class GalleryView extends Component<IGallery> {
         this.catalogueElement = this.container;
     }
 
-    protected set catalogue(items: HTMLElement[]) {
+    set catalogue(items: HTMLElement[]) {
         this.catalogueElement.replaceChildren();
 
         items.forEach((item) => {

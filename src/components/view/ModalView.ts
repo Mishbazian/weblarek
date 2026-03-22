@@ -1,4 +1,4 @@
-import { IModal } from "../../types";
+import { TModal } from "../../types";
 import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
@@ -6,7 +6,7 @@ import { IEvents } from "../base/Events";
 /**
  * Модальное окно. Расширяет Component элементом для внутреннего контента и кнопкой закрытия. Передает событие клика на кнопку закрытия в брокер событий.
  */
-export class ModalView extends Component<IModal> {
+export class ModalView extends Component<TModal> {
     private closeButton: HTMLButtonElement;
     private contentContainer: HTMLElement;
     /**

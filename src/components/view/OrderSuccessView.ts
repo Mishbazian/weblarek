@@ -1,4 +1,4 @@
-import { TCardActions, TOrderSuccess } from "../../types";
+import { TCardActions, TOrderSuccess, TOrderSuccessActions } from "../../types";
 import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/Component";
 
@@ -7,7 +7,7 @@ import { Component } from "../base/Component";
  */
 export class OrderSuccessView extends Component<TOrderSuccess> {
     private totalElement: HTMLElement;
-    constructor(container: HTMLElement, actions: TCardActions) {
+    constructor(container: HTMLElement, actions: TOrderSuccessActions) {
         super(container);
         this.totalElement = ensureElement(
             ".order-success__description",

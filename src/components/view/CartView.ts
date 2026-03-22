@@ -1,13 +1,10 @@
-import { cloneTemplate, ensureElement } from "../../utils/utils";
+import { TCart } from "../../types";
+import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/Component";
 
-interface ICart {
-    products: HTMLElement[];
-    cartPrice: number;
-    isCanOrder: boolean;
-}
 
-export class CartView extends Component<ICart> {
+
+export class CartView extends Component<TCart> {
     private productsList: HTMLUListElement;
     private orderButton: HTMLButtonElement;
     private priceElement: HTMLElement;

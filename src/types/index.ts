@@ -58,13 +58,22 @@ export interface IOrderResponse {
     total: number;
 }
 
-export interface IHeader {
-    counter: number;
+/**
+ * Тип данных для render в шапке сайта
+ */
+export type THeader = {
+    counter: number; // количество товаров в корзине
 }
+/**
+ * Тип данных для render компонента галереи
+ */
+export type TGallery = {
+    catalogue: HTMLElement[]; // массив элементов контента
+} 
 
 /**
  * Базовый тип данных продукта для приведения к виду необходимому в карточках */ 
-export interface ICardProduct {
+export type TCardProduct = {
     id: string;
     title: string;
     price: string;
@@ -79,12 +88,12 @@ export interface ICardProduct {
 /**
  * Тип - Объект с минимальным набором данных для карточки товара
  */
-export type TCardBase = Pick<ICardProduct, "title" | "price">;
+export type TCardBase = Pick<TCardProduct, "title" | "price">;
 /**
  * Тип данных для установки в карточку товара изображения и категории
  */
-export type TCardExt = Pick<ICardProduct, "image" | "category">;
-export type TCardInfo = Pick<ICardProduct, "description">;
+export type TCardExt = Pick<TCardProduct, "image" | "category">;
+export type TCardInfo = Pick<TCardProduct, "description">;
 /**
  * Тип данных расширяющий базовые данные картоки товара порядковым номером в корзине. Для карточки в корзине.
  */
@@ -103,7 +112,14 @@ export type TCardPreview = TCardInfo & {
 //Тип данных для установки соответствия состояния кнопки и текста
 export type TCardStates = Record<TOrderButtonState, string>
 
-
+/**
+ * Тип данных необходимый для render в CartView
+ */
+export type TCart = {
+    products: HTMLElement[]; // массив элементов карточек товара
+    cartPrice: number; // итоговая стоимость всей корзины
+    isCanOrder: boolean; // доступность покупки
+}
 
 
 //Типы для событий
@@ -138,9 +154,9 @@ export type TOrderSuccessActions = Pick<TActions, "onClick">;
 /**
  * Тип данных для рендера модального окна
  */
-export interface IModal {
+export type TModal = {
     content: HTMLElement; //содержимое модального окна
-    open: boolean; // модальное окноЖ открыть да/нет
+    open: boolean; // модальное окно открыть да/нет
 }
 
 //Типы для форм
