@@ -1,3 +1,5 @@
+import { TActions } from "../types";
+
 export function pascalToKebab(value: string): string {
     return value.replace(/([a-z0–9])([A-Z])/g, "$1-$2").toLowerCase();
 }
@@ -138,5 +140,29 @@ export function createElement<
 }
 
 export function isFilledString(value: string): boolean {
-        return value.trim().length > 0;
-    }
+    return value.trim().length > 0;
+}
+/**
+ * Устанавливает подписки и обработчики на события из объекта events на контейнер. Понимает прямые названия события типа `click` и производные с префиксом `on`, например `onClick`
+ * @param {HTMLElement} container - элемент, события которого отслеживать
+ * @param {object} events - объект вида {onClick: handle}
+ * @returns {Array} - массив объектов с параметрами готовыми для подстановки в функцию удаления слушателей.
+ */
+export function addHandledEventListeners(
+    container: HTMLElement,
+    events: Partial<TActions>,
+): object[] {
+    const listeners: object[] = [];
+    Object.entries(events).forEach(([key, callback]) => {
+        const eventName: string = key.replace(/^on/, "").toLowerCase();
+        const listenerCb = (e: Event) => {
+            if (eventName === "submit") {
+                e.preventDefault();
+            }
+            callback(e);
+        };
+        container.addEventListener(eventName, listenerCb);
+        listeners.push({ eventName: eventName, handler: listenerCb });
+    });
+    return listeners;
+}
