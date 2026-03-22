@@ -3,23 +3,22 @@ import { ensureElement } from "../../../utils/utils";
 import { CardView } from "./CardView";
 
 /**
- * Карточка товара в корзине. Расширяет CardView элементом для установки порядкового номера товара в корзине и добавляет обработчик, полученный в конструкторе на событие клика кнопки удаления товара из корзины.
+ * Карточка товара в корзине. Расширяет CardView элементом для установки порядкового номера товара в корзине.
  */
 export class CardCartView extends CardView<TCardCart> {
     private indexElement: HTMLElement;
-        /**
-     * @constructor создает экземпляр карточки и устанавливает обработчик события клика.
+    /**
+     * @constructor создает экземпляр карточки
      * @param {HTMLElement} container - DOM элемент, содержащий структуру карточки
      * @param {object} actions - объект, содержащий коллбэк-функцию для обработки событий.
      */
     constructor(container: HTMLElement, actions: TCardActions) {
-        super(container);
+        const deleteButton = ensureElement(".basket__item-delete", container);
+        super(container, deleteButton, actions);
         this.indexElement = ensureElement(
             ".basket__item-index",
             this.container,
         );
-        const deleteButton = ensureElement('.basket__item-delete', this.container)
-        deleteButton.addEventListener('click', actions.onClick)
     }
     /**
      * установить порядковый номер в списке товаров корзины

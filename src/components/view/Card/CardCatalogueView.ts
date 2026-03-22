@@ -1,7 +1,7 @@
 import { TCardActions } from "../../../types";
 import { CardExtView } from "./CardExtView";
 /**
- * Карточка товара в каталоге. Добавляет родительскому классу генерацию событий.
+ * Карточка товара в каталоге.
  */
 export class CardCatalogueView extends CardExtView<void> {
     /**
@@ -10,7 +10,6 @@ export class CardCatalogueView extends CardExtView<void> {
      * @param {object} actions - объект, содержащий коллбэк-функцию для обработки событий.
      */
     constructor(container: HTMLElement, actions: TCardActions) {
-        super(container);
-        this.container.addEventListener('click', actions.onClick)
+        super(container, container, actions);
     }
 }

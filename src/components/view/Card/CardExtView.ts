@@ -1,4 +1,4 @@
-import { TCardExt } from "../../../types";
+import { TCardActions, TCardExt } from "../../../types";
 import { categoryMap } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
 import { CardView } from "./CardView";
@@ -14,9 +14,15 @@ export abstract class CardExtView<T> extends CardView<TCardExt & T> {
     /**
      * @constructor Создает экземпляр CardExtView.
      * @param {HTMLElement} container - DOM-элемент, содержащий структуру карточки.
+     * @param {HTMLElement} mainActionElement - элемент, который должен вызывать событие при клике
+     * @param {object?} actions - объект, содержащий коллбэк-функции для обработки событий.
      */
-    constructor(container: HTMLElement) {
-        super(container);
+    constructor(
+        container: HTMLElement,
+        mainActionElement: HTMLElement,
+        actions?: TCardActions,
+    ) {
+        super(container, mainActionElement, actions);
         this.categoryElement = ensureElement(".card__category", this.container);
         this.imageElement = ensureElement<HTMLImageElement>(
             ".card__image",
