@@ -555,7 +555,7 @@ constructor(
 
 Конструктор:
 
-- `constructor(container: HTMLElement)` - принимает ссылку на DOM элемент за отображение, которого он отвечает.
+- `constructor(container: HTMLElement, actions: TFormActions)` - принимает ссылку на DOM элемент содержащий форму и объект с коллбэк-функциями для обработки событий формы.
 
 #### Класс OrderSuccessView
 
