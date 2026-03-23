@@ -1,13 +1,14 @@
-import { TCardActions, TCardExt } from "../../../types";
+import { TCardActions, TCardExtInfo, TCardProduct } from "../../../types";
 import { categoryMap } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
 import { CardView } from "./CardView";
 
 /**
- * .Абстрактный класс для карточки товара с дополнительными полями (категория, изображение) Расширяет CardView.
- * @template T - тип дополнительных данных карточки, объединяемый с TCardExt.
+ * Абстрактный класс для карточки товара с дополнительными полями (категория, изображение).
+Расширяет CardView возможностью установки категории и изображения товара.
+Дженерик, принимает T - тип дополнительных данных карточки для метода render().
  */
-export abstract class CardExtView<T> extends CardView<TCardExt & T> {
+export abstract class CardExtView<T> extends CardView<TCardExtInfo & T> {
     protected categoryElement: HTMLElement;
     protected imageElement: HTMLImageElement;
 
@@ -50,7 +51,7 @@ export abstract class CardExtView<T> extends CardView<TCardExt & T> {
      * @param {string} image.url - URL изображения.
      * @param {string} image.alt - альтернативный текст.
      */
-    set image({ url, alt }: TCardExt["image"]) {
+    set image({ url, alt }: TCardProduct["image"]) {
         this.setImage(this.imageElement, url, alt);
     }
 }

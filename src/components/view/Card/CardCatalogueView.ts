@@ -1,7 +1,7 @@
 import { TCardActions } from "../../../types";
 import { CardExtView } from "./CardExtView";
 /**
- * Карточка товара в каталоге.
+ * карточка товара в каталоге (наследует `CardExtView`).
  */
 export class CardCatalogueView extends CardExtView<void> {
     /**

@@ -1,14 +1,13 @@
-import { TCardActions, TCardBase } from "../../../types";
+import { TCardActions, TCardBaseInfo } from "../../../types";
 import { ensureElement } from "../../../utils/utils";
 import { Component } from "../../base/Component";
 
 /**
  * Базовый класс для всех карточек товара.
-Наследует класс Component c интерфейсом ICardBase в переменной.
-Принимает в собственную переменную `T` тип данных, расширяющий данные принимаемые методом `remder()` родительского компонента. Генерирует событие, через полученную в конструкторе коллбэк-функцию при клике на установленный элемент.
-* @template T - тип дополнительных данных карточки, объединяемый с TCardBase.
+Расширяет класс Component возможностью установки заголовка и цены товара.
+Дженерик. Принимает в собственную переменную `T` тип данных, расширяющий данные принимаемые методом `remder()` родительского компонента. Генерирует событие, через полученную в конструкторе коллбэк-функцию при клике на установленный элемент.
  */
-export abstract class CardView<T> extends Component<TCardBase & T> {
+export abstract class CardView<T> extends Component<TCardBaseInfo & T> {
     protected titleElement: HTMLElement;
     protected priceElement: HTMLElement;
     /**

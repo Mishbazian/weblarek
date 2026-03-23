@@ -1,11 +1,11 @@
-import { TCardActions, TCardCart } from "../../../types";
+import { TCardActions, TCardCartExt } from "../../../types";
 import { ensureElement } from "../../../utils/utils";
 import { CardView } from "./CardView";
 
 /**
- * Карточка товара в корзине. Расширяет CardView элементом для установки порядкового номера товара в корзине.
+ * Карточка товара в корзине. Расширяет CardView возможностью установки порядкового номера товара в корзине.
  */
-export class CardCartView extends CardView<TCardCart> {
+export class CardCartView extends CardView<TCardCartExt> {
     private indexElement: HTMLElement;
     /**
      * @constructor создает экземпляр карточки
@@ -27,3 +27,4 @@ export class CardCartView extends CardView<TCardCart> {
         this.indexElement.textContent = value.toString();
     }
 }
+
