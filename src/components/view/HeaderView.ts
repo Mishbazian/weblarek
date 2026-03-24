@@ -31,7 +31,7 @@ export class HeaderView extends Component<THeader> {
             this.container,
         );
         this.cartButton.addEventListener("click", () => {
-            this.events.emit("cart:open");
+            this.events.emit("cart:show");
         });
     }
 
