@@ -16,19 +16,19 @@ export class Buyer {
     private readonly validationRules: TValidationRules<IBuyer> = {
         payment: {
             validateFn: () => isFilledString(this.data.payment.toString()),
-            message: "Необходимо укаазать вид оплаты",
+            message: "Необходимо указать вид оплаты",
         },
         email: {
             validateFn: () => isFilledString(this.data.email),
-            message: "Необходимо укаазать email",
+            message: "Необходимо указать email",
         },
         phone: {
             validateFn: () => isFilledString(this.data.phone),
-            message: "Необходимо укаазать номер телефона",
+            message: "Необходимо указать номер телефона",
         },
         address: {
             validateFn: () => isFilledString(this.data.address),
-            message: "Необходимо укаазать адрес",
+            message: "Необходимо указать адрес",
         },
     };
     constructor(private events: IEvents) {}
@@ -36,7 +36,7 @@ export class Buyer {
     setData(fields: Partial<IBuyer>): void {
         Object.assign(this.data, fields);
         this.events.emit("buyer:update", this.getData());
-        this.notify()
+        this.notify();
     }
 
     getData(): IBuyer {
@@ -46,7 +46,7 @@ export class Buyer {
     clearData(): void {
         const freshBuyer = new Buyer(this.events);
         Object.assign(this.data, freshBuyer.data);
-        this.notify()
+        this.notify();
     }
 
     validateData(): Partial<TValidationErrorMessages<IBuyer>> {
@@ -62,6 +62,9 @@ export class Buyer {
     }
 
     private notify() {
-        this.events.emit("model:buyer:update", this.data );
+        this.events.emit("model:buyer:update", {
+            data: this.data,
+            errors: this.validateData(),
+        });
     }
 }

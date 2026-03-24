@@ -45,7 +45,7 @@ export class Cart {
 
     private notify() {
         this.events.emit("model:cart:update", {
-            cart: this.getProducts(),
+            products: this.getProducts(),
             price: this.getFullCost(),
             count: this.getProdctsCount(),
         });

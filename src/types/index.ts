@@ -19,9 +19,14 @@ export interface IProduct {
     category: string;
     price: number | null;
 }
-/**
- * Данные покупателя
- */
+/** Данные, отправляемые моделью с событием model:cart:update */
+export type TCartData = {
+    products: IProduct[]; // массив товаров корзины
+    price: number; // общая цена товаров в корзине
+    count?: number; // количество товаров в корзине
+}
+
+/** Данные покупателя */
 export interface IBuyer {
     payment: TPayment; // вид оплаты
     email: string;
@@ -39,22 +44,25 @@ export type TValidationRules<T> = {
 export type TValidationErrorMessages<T> = {
     [key in keyof T]: string;
 };
+/**Данные высылаемые моделью Buyer вместе с событием */
+export type TBuyerData = {
+    data: IBuyer;
+    errors: Partial<TValidationErrorMessages<IBuyer>>;
+}
 
 export interface IProductResponse {
     total: number;
     items: IProduct[];
 }
-/**
- *
- */
+/** Заказ к отправке на серввер */
 export interface IOrder extends IBuyer {
     total: number; // - итоговая стоимость товаров в заказе
     items: IProduct["id"][]; // - массив с id товаров в заказзе
 }
-
+/**Ответ на успешный запрос заказа */
 export interface IOrderResponse {
-    id: string;
-    total: number;
+    id: string; // id заказа
+    total: number; // - итоговая стоимость товаров в заказе
 }
 
 /**Тип данных для render в шапке сайта*/
@@ -69,7 +77,6 @@ export type TGallery = {
 
 /**Базовый тип данных продукта для приведения к виду необходимому в карточках*/
 export type TCardProduct = {
-    id: string;
     title: string;
     price: string;
     category: string;
@@ -97,16 +104,21 @@ export type TOrderButtonState = "add" | "remove" | "disabled";
 export type TCardStates = Record<TOrderButtonState, string>;
 
 /**Тип данных для расширения данных карточки превью товара */
-export type TCardPreviewExt = Pick<TCardProduct, "description"> & {
+export type TCardFull = Pick<TCardProduct, "description"> & {
     state: TOrderButtonState;
+
 };
+//Все типы данных карточек собранные в один
+export type TCardCatalogueView = TCardBaseInfo & TCardExtInfo
+export type TCardPreview = TCardBaseInfo & TCardExtInfo & TCardFull
+export type TCardCartView = TCardBaseInfo & TCardCartExt
 
 
 
 /**Тип данных необходимый для render в CartView*/
 export type TCart = {
     products: HTMLElement[]; // массив элементов карточек товара
-    cartPrice: number; // итоговая стоимость всей корзины
+    cartPrice: string; // итоговая стоимость всей корзины
     isCanOrder: boolean; // доступность покупки
 };
 
@@ -147,6 +159,8 @@ export type TOrderPayment = "cash" | "card" | "";
 export type TFormPayment = {
     payment: TOrderPayment;
 };
+
+export type TFormOrder = TFormStatus & TFormPayment
 
 export type TOrderSuccess = {
     total: string;
