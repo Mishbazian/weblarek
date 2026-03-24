@@ -31,7 +31,7 @@ export class CartView extends Component<TCart> {
         items.forEach((item)=>
         this.productsList.append(item))
     }
-    set cartPrice(value: number) {
+    set cartPrice(value: string) {
         this.priceElement.textContent = value.toString();
     }
     set isCanOrder(value: boolean) {

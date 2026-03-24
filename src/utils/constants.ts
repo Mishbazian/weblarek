@@ -1,4 +1,4 @@
-import { TCardStates } from "../types";
+import { TCardStates, TPaymentMap } from "../types";
 
 /* Константа для получения полного пути для сервера. Для выполнения запроса 
 необходимо к API_URL добавить только ендпоинт. */
@@ -36,9 +36,10 @@ export const cardActions: TCardStates = {
 /**
  *@constant Константа приведения типа платежа в представлении(ключ) и в модели данных(значение)
  */
-export const paymentTypeMap = {
-  'cash': 'cash',
-  'card': 'online'
+export const paymentTypeMap: TPaymentMap = {
+  "cash": "cash",
+  "online": "card",
+  "": ""
 }
 
 

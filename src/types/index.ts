@@ -11,6 +11,7 @@ export interface IApi {
 
 export type TPayment = "cash" | "online" | "";
 
+
 export interface IProduct {
     id: string;
     description: string;
@@ -159,6 +160,8 @@ export type TOrderPayment = "cash" | "card" | "";
 export type TFormPayment = {
     payment: TOrderPayment;
 };
+/**Приведение типов платежей в модели и в форме */
+export type TPaymentMap = Record<TPayment, TOrderPayment>
 
 export type TFormOrder = TFormStatus & TFormPayment
 

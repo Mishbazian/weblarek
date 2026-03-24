@@ -1,4 +1,4 @@
-import { TCardActions, TOrderButtonState, TCardPreviewExt } from "../../../types";
+import { TCardActions, TOrderButtonState, TCardFull } from "../../../types";
 import { cardActions } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
 import { CardExtView } from "./CardExtView";
@@ -6,7 +6,7 @@ import { CardExtView } from "./CardExtView";
 /**
  * Карточка товара в режиме предпросмотра. Расширяет родительский класс возможностью установки описания товара и управления кнопкой заказа.
  */
-export class CardPreviewView extends CardExtView<TCardPreviewExt> {
+export class CardPreviewView extends CardExtView<TCardFull> {
     private descriptionElement: HTMLElement;
     private orderButton: HTMLButtonElement;
     /**
