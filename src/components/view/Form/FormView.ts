@@ -1,6 +1,7 @@
-import { TFormActions, TFormStatus } from "../../../types";
+import { TFormStatus } from "../../../types";
 import { ensureElement } from "../../../utils/utils";
 import { Component } from "../../base/Component";
+import { IEvents } from "../../base/Events";
 
 /**
  * Базовый класс для отображения форм. Расширяет Component. Эмитирует браузерные события change и submit с данными формы через полученный в конструкторе интерфейс брокера сообщений и выводит сообщения об ошибках.
@@ -14,7 +15,7 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
      * @param {HTMLElement} container - контейнер содержащий форму
      * @param {TFormActions} actions -  объект, содержащий коллбэк-функции для обработки событий.
      */
-    constructor(container: HTMLElement, actions: TFormActions) {
+    constructor(private events: IEvents, container: HTMLElement) {
         super(container);
 
         this.submitButton = ensureElement<HTMLButtonElement>(
@@ -24,13 +25,14 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
         this.errorsElement = ensureElement(".form__errors", this.container);
         this.form = this.container as HTMLFormElement;
 
-        this.form.addEventListener("change", (e) => actions.onChange(e));
-
-        this.form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            actions.onSubmit(e);
+        this.form.addEventListener("change", () => {
+            events.emit('form:${this.form.name}:change', new FormData(this.form))
         });
-    }
+
+          this.form.addEventListener("submit", (e) => {
+              e.preventDefault();
+              this.events.emit(`form:${this.form.name}:submit`, new FormData(this.form));
+    })}
 
     set isSubmitDisabled(value: boolean) {
         this.submitButton.disabled = value;
