@@ -26,7 +26,7 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
         this.form = this.container as HTMLFormElement;
 
         this.form.addEventListener("change", () => {
-            events.emit('form:${this.form.name}:change', new FormData(this.form))
+            events.emit(`form:${this.form.name}:change`, new FormData(this.form))
         });
 
           this.form.addEventListener("submit", (e) => {
@@ -35,10 +35,11 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
     })}
 
     set isSubmitDisabled(value: boolean) {
+        console.log("want next ", value)
         this.submitButton.disabled = value;
     }
 
-    set errors(message: string) {
+    set error(message: string) {
         this.errorsElement.textContent = message;
     }
 }
