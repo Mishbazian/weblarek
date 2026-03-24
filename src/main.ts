@@ -1,128 +1,90 @@
 import { ProductApi } from "./components/api/ProductApi";
 import { Api } from "./components/base/Api";
+import { EventEmitter } from "./components/base/Events";
 import { Buyer } from "./components/models/Buyer";
 import { Cart } from "./components/models/Cart";
 import { Catalogue } from "./components/models/Catalogue";
+import {
+    ICardFactory,
+    IComponent,
+    Presenter,
+    TView,
+} from "./components/presenter/Presenter";
+import { CardCartView } from "./components/view/Card/CardCartView";
+import { CardCatalogueView } from "./components/view/Card/CardCatalogueView";
+import { CardPreviewView } from "./components/view/Card/CardPreviewView";
+import { CartView } from "./components/view/CartView";
+import { FormContactsView } from "./components/view/Form/FormContactsView";
+import { FormOrderView } from "./components/view/Form/FormOrderView";
+import { GalleryView } from "./components/view/GalleryView";
+
+import { HeaderView } from "./components/view/HeaderView";
+import { ModalView } from "./components/view/ModalView";
+import { OrderSuccessView } from "./components/view/OrderSuccessView";
 import "./scss/styles.scss";
-import { IProduct } from "./types";
+import { TCardActions, TCardCatalogueView } from "./types";
+
 import { API_URL } from "./utils/constants";
-import { apiProducts } from "./utils/data";
+import { cloneTemplate } from "./utils/utils";
 
-//Тестирование методов
-//Каталог
-const productsModel = new Catalogue();
-console.log("Пустой массив товаров из каталога: ", productsModel.getProducts());
-//Наполним каталог
-productsModel.setProducts(apiProducts.items);
-console.group("Массив товаров из каталога: ")
-console.table(productsModel.getProducts());
-console.groupEnd()
-
-//Получим товар по id
-let product = productsModel.getProductById(
-    "854cef69-976d-4c2a-a18c-2aa45046c390",
-) as IProduct;
-console.group("Продукт, полученный по id 854cef69-976d-4c2a-a18c-2aa45046c390");
-console.table(product)
-console.groupEnd()
-
-//добавим выбранный товар
-productsModel.setSelectedProduct(product);
-console.log("Выбранный товар - ", productsModel.getSelectedProduct());
-//изменим выбранный товар
-product = productsModel.getProductById(
-    "c101ab44-ed99-4a54-990d-47aa2bb4e7d9"
-) as IProduct;
-productsModel.setSelectedProduct(product);
-console.log("Выбранный товар - ", productsModel.getSelectedProduct());
-
-//Корзина
-const cartModel = new Cart();
-console.log("Пустая корзина: ", cartModel.getProducts());
-//наполним корзину
-productsModel.getProducts().forEach((item) => {
-    cartModel.addProduct(item);
-});
-
-
-console.group("Наполненная корзина: ")
-console.table([...cartModel.getProducts()])
-console.log("всего товаров -",
-    cartModel.getProdctsCount(),
-    "на сумму - ",
-    cartModel.getFullCost(),)
-    console.log(
-    "есть ли товар 854cef69-976d-4c2a-a18c-2aa45046c390 в корзине? ",
-    cartModel.hasProduct("854cef69-976d-4c2a-a18c-2aa45046c390"),
-);
-console.groupEnd()
-
-//есть ли товар в корзине?
-
-// удалим один товар из корзины
-cartModel.removeProduct(cartModel.getProducts()[0]);
-console.group("Корзина после удаления одного товара: ")
-console.table([...cartModel.getProducts()])
-console.log("всего товаров -",
-    cartModel.getProdctsCount(),
-    "на сумму - ",
-    cartModel.getFullCost(),)
-    console.log(
-    "есть ли удаленный товар 854cef69-976d-4c2a-a18c-2aa45046c390 в корзине? ",
-    cartModel.hasProduct("854cef69-976d-4c2a-a18c-2aa45046c390"),
-);
-console.groupEnd()
-
-//Очистим корзину
-cartModel.clearProducts()
-console.log(
-    "корзина после полной очистки: ",
-    [...cartModel.getProducts()],
-    "всего товаров -",
-    cartModel.getProdctsCount(),
-    "на сумму - ",
-    cartModel.getFullCost(),
-);
-
-//Покупатель
-const buyerModel = new Buyer();
-console.group("Пустые данные покупателя: ")
-console.table(buyerModel.getData());
-console.table(buyerModel.validateData())
-console.groupEnd()
-
-//Запишем часть данных
-buyerModel.setData({payment: "Cash", phone: "8880022222"})
-console.group("Данные покупателя заполнены частично: ")
-console.table(buyerModel.getData());
-console.table(buyerModel.validateData())
-console.groupEnd()
-
-//Запишем все данные
-buyerModel.setData({phone: "80000000000", address: "Масква", email: "кокоййто мейл"})
-console.group("Данные покупателя дозаполнены полностью: ")
-console.log(buyerModel.getData());
-console.log("Валидация (все поля заполнены) - ", buyerModel.validateData())
-console.groupEnd()
-
-//Очистим все данные
-buyerModel.clearData()
-console.group("Данные покупателя после очистки: ")
-console.table(buyerModel.getData());
-console.groupEnd()
-//Тестируем получение данных с сервера
+//Инстансы классов
 const api = new ProductApi(new Api(API_URL));
-//Обновление данных с сервера и наолние каталога
-async function updateCatalogue() {
-    try {
-        const productsList = await api.getProducts();
-        //Наполним каталог
-        productsModel.setProducts(productsList);
-        console.group("==Каталог заполненный с сервера==")
-        console.table(productsList);
-        console.groupEnd()
-    } catch (err: unknown) {
-        console.error("Couldn't load data: ", err);
-    }
-}
-updateCatalogue();
+const emitter = new EventEmitter();
+//инстансы моделей
+const models = {
+    catalogue: new Catalogue(emitter),
+    cart: new Cart(emitter),
+    buyer: new Buyer(emitter),
+};
+
+//инстансы представлений
+const gallery = new GalleryView(
+    document.querySelector(".gallery") as HTMLElement,
+);
+const modal = new ModalView(
+    emitter,
+    document.querySelector(".modal") as HTMLElement,
+);
+const header = new HeaderView(
+    emitter,
+    document.querySelector(".header") as HTMLElement,
+);
+
+const formOrder = new FormOrderView(emitter, cloneTemplate("#order"));
+const formContacts = new FormContactsView(emitter, cloneTemplate("#contacts"));
+const cart = new CartView(emitter, cloneTemplate("#basket"));
+const orderSuccess = new OrderSuccessView(emitter, cloneTemplate("#success"));
+
+const createCardCatalogue = (
+    actions: TCardActions,
+): IComponent<TCardCatalogueView> => {
+    return new CardCatalogueView(cloneTemplate("#card-catalog"), actions);
+};
+const createCardPreview = (actions?: TCardActions) => {
+    return new CardPreviewView(cloneTemplate("#card-preview"), actions);
+};
+const createCardCart = (actions: TCardActions) => {
+    return new CardCartView(cloneTemplate("#card-basket"), actions);
+};
+
+const cardFactory: ICardFactory = {
+    createCardCatalogue,
+    createCardCart,
+    createCardPreview,
+};
+
+const view: TView = {
+    header,
+    modal,
+    gallery,
+    cart,
+    formOrder,
+    formContacts,
+    orderSuccess,
+    cardFactory,
+};
+
+const presenter = new Presenter(emitter, api, models, view);
+
+//Обновление данных с сервера и наполнение каталога
+await presenter.updateCatalogue();
