@@ -35,4 +35,8 @@ export class FormOrderView extends FormView<TFormPayment> {
     set payment(value: string) {
         this.paymentToggler.activeButton = value;
     }
+    set reset(value: true) {
+        super.reset = value;
+        if (value) this.paymentToggler.activeButton = "";
+    }
 }

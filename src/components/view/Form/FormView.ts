@@ -45,11 +45,18 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
     }
 
     set isSubmitDisabled(value: boolean) {
-        console.log("want next ", value);
         this.submitButton.disabled = value;
     }
 
     set error(message: string) {
         this.errorsElement.textContent = message;
+    }
+
+    set reset(value: boolean){
+        if(value)
+        {this.form.reset()
+            this.errorsElement.textContent = "";
+            this.submitButton.disabled = true;
+        }
     }
 }
