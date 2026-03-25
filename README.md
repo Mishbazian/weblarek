@@ -10,6 +10,14 @@
 
 - src/components/base/ -- папка с базовым кодом
 
+- src/components/view/ -- папка с компонентами Представления
+
+- src/components/models/ -- папка с компонентами Млдели двнных
+
+- src/components/presenter/ -- папка с Презентером
+
+- src/components/api/ -- папка с компонентами слоя коммуникации
+
 Важные файлы:
 
 - index.html -- HTML-файл главной страницы
@@ -113,50 +121,322 @@ Presenter - презентер содержит основную логику п
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие с передачей в него данных из второго параметра.
 
 ### Данные
-
-- **Интерфейс IProduct** определяет набор полей отдельного Товара в модели Catalogue.
-
+- Методы запросов к API `type ApiPostMethods = "POST" | "PUT" | "DELETE";`
+- *Интерфейс базового API*
     ```typescript
-    interface IProduct {
-        id: string; //- уникальный идентификатор товара в приложении;
-        description: string; // - текстовое описание товара;
-        image: string; // - ссылка на изображение товара на сервере;
-        title: string; // - название товара
-        category: string; // - категория товара
-        price: number | null; //- цена товара
+    export interface IApi {
+        get<T extends object>(uri: string): Promise<T>;
+        post<T extends object>(
+            uri: string,
+            data: object,
+            method?: ApiPostMethods,
+        ): Promise<T>;
     }
     ```
 
-- **Интерфейс IByer** определяет набор полей для работы с данными покупателя при заказе
+ - Вид оплаты в модели Buyer - набор предопределенных значений для выбора пользователем
+`export type TPayment = "cash" | "online" | "";`
+ - Вид оплаты в представлении FormOrderView 
+`export type TOrderPayment = "cash" | "card" | "";`
+ - Объект для приведения типов платежей в модели Buyer и в форме FormOrderView
+`export type TPaymentMap = Record<TPayment, TOrderPayment>`
 
+ - определяет набор полей отдельного Товара в модели Catalogue.
     ```typescript
-    interface IBuyer {
-      payment: TPayment = ""; // - выбранный покупателем вид оплаты. Принимает одно из предопределенных в `TPayment` значений, например «Card» или «Cash».
-      email: string; // -  указанный покупателем email;
-      phone: string; // - указанный покупателем номер телефона;
-      address: string; // - - указанный покупателем адрес доставки.
+    export interface IProduct {
+        id: string;
+        description: string;
+        image: string;
+        title: string;
+        category: string;
+        price: number | null;
     }
     ```
-
-- `type TPayment = "Card" | "Cash" | ""`\- вид оплаты - набор предопределенных значений для выбора пользователем
-
-- `type TValidationRules<T>` - обобщенный тип данных, принимает в параметр T интерфейс или тип данных в виде объекта, позволяет хранить правила для каждого ключа принятого объекта:
-
+ -  Данные, отправляемые моделью Cart с событием model:cart:update 
     ```typescript
-    type TValidationRules<T> = {
+    export type TCartData = {
+        products: IProduct[]; // массив товаров корзины
+        price: number; // общая цена товаров в корзине
+        count?: number; // количество товаров в корзине
+    }
+    ```
+ -  Данные покупателя 
+    ```typescript
+    export interface IBuyer {
+        payment: TPayment; // вид оплаты
+        email: string;
+        phone: string;
+        address: string;
+    }
+    ```
+ - Тип объекта с правилами валидации полей объекта с типом полученным в T (напр. модели Buyer), требует соответствия ключей ключам T 
+    ```typescript
+    export type TValidationRules<T> = {
         [key in keyof T]: {
-            validateFn: () => boolean; // - функция валидации поля
-            message: string; // - текстовое сообщение
+            validateFn: () => boolean;
+            message: string;
         };
     };
     ```
-
-- `type TValidationErrorMessages<T>` - обобщенный тип данных, принимает в параметр T интерфейс или тип данных в виде объекта, позволяет хранить объект с ключами принятого объекта и текстовыми сообщениями об ошибках валидации для этого ключа.
-
+ - Тип данных объекта, содержащего сообщения об ошибках, принимает в T другой объект, ключи которого требуется продублировать  
     ```typescript
-    TValidationErrorMessages<T> = {
-      [key in keyof T]: string;
+    export type TValidationErrorMessages<T> = {
+        [key in keyof T]: string;
+    };
+    ```
+ -  Тип данных высылаемых моделью Buyer вместе с событием 
+    ```typescript
+    export type TBuyerData = {
+        data: IBuyer; 
+        errors: Partial<TValidationErrorMessages<IBuyer>>;
     }
+    ```
+ -  Тип данных получаемых при запросе каталога продуктов 
+    ```typescript
+    export interface IProductResponse {
+        total: number;
+        items: IProduct[];
+    }
+    ```
+ -  Заказ к отправке на серввер 
+    ```typescript
+    export interface IOrder extends IBuyer {
+        total: number; // - итоговая стоимость товаров в заказе
+        items: IProduct["id"][]; // - массив с id товаров в заказзе
+    }
+    ```
+ - Ответ на успешный запрос заказа 
+    ```typescript
+    export interface IOrderResponse {
+        id: string; // id заказа
+        total: number; // - итоговая стоимость товаров в заказе
+    }
+    ```
+ - Тип данных для render в шапке сайта
+    ```typescript
+    export type THeader = {
+        counter: number; // количество товаров в корзине
+    };
+    ```
+ - Тип данных для render компонента галереи
+    ```typescript
+    export type TGallery = {
+        catalogue: HTMLElement[]; // массив элементов контента
+    };
+    ```
+ - Базовый тип данных товара приведенный к виду необходимому в карточках
+    ```typescript
+    export type TCardProduct = {
+        title: string;
+        price: string;
+        category: string;
+        image: {
+            url: string;
+            alt?: string;
+        };
+        description: string;
+    };
+    ```
+ - Тип с минимальным набором данных для карточки товара
+`export type TCardBaseInfo = Pick<TCardProduct, "title" | "price">;`
+
+ - Тип данных для установки в карточку товара изображения и категории
+`export type TCardExtInfo = Pick<TCardProduct, "image" | "category">;`
+
+ - Тип, расширяющий данные карточки товара для корзине.
+    ```typescript
+    export type TCardCartExt = {
+        index: number;
+    };
+    ```
+ - Возможные значения состояния кнопки заказа в карточке
+`export type TOrderButtonState = "add" | "remove" | "disabled";`
+ - Тип данных объекта, устанавливающего соответствие состояния кнопки заказа и текста в ней
+`export type TCardStates = Record<TOrderButtonState, string>;`
+
+ - Тип данных для расширения данных карточки превью товара 
+    ```typescript
+    export type TCardFull = Pick<TCardProduct, "description"> & {
+        state: TOrderButtonState;
+
+    };
+    ```
+*Производные типы данных карточек, содержащие полный набор для отдельного компонента, включая данные родительского класса*
+ - Производный тип данных карточки товара для каталога, содержащий полный набор, включая данные родительского класса 
+`export type TCardCatalogueView = TCardBaseInfo & TCardExtInfo`
+ - Производный тип данных карточки товара для превью, содержащий полный набор, включая данные родительского класса 
+`export type TCardPreviewView = TCardBaseInfo & TCardExtInfo & TCardFull`
+ - Производный тип данных карточки товара для корзины, содержащий полный набор, включая данные родительского класса 
+`export type TCardCartView = TCardBaseInfo & TCardCartExt`
+
+
+
+ - Тип данных необходимых для render в CartView
+    ```typescript
+    export type TCart = {
+        products: HTMLElement[]; // массив элементов карточек товара
+        cartPrice: string; // итоговая стоимость всей корзины
+        isCanOrder: boolean; // доступность покупки
+    };
+    ```
+**Типы для событий**
+ - Перечень алиасов для стандартных событий браузера
+`export type TStandardEvents = "onClick" | "onChange" | "onSubmit";`
+
+ - Тип данных - функция обработчик стандартного события браузера
+`export type TEventHandle = (event: Event) => void;`
+
+ - Тип объекта с набором обработчиков стандартных событий с литералом в ключе
+`export type TActions = Record<TStandardEvents, TEventHandle>;`
+
+ - Тип объекта с обработчикaми события для карточки
+`export type TCardActions = Pick<TActions, "onClick">;`
+
+
+ - Тип данных для рендера модального окна
+    ```typescript
+    export type TModal = {
+        content: HTMLElement; //содержимое модального окна
+        open: boolean; // модальное окно открыть да/нет
+    };
+    ```
+
+**Типы для форм**
+ -  Объект данных принмаемых в render() FormView
+    ```typescript
+    export type TFormStatus = {
+        isSubmitDisabled: boolean; // - отключить кнопку submit да/нет
+        error: string; // - сообщение об ошибках формы
+        reset: boolean; // - сбросить форму да/нет
+    };
+    ```
+
+ -  Объект данных о типе платежа в форме 
+    ```typescript
+    export type TFormPayment = {
+        payment: TOrderPayment;
+    };
+    ```
+ -  Производный тип объединяющий все данные принимаемые FormOrder, включая типы от класса родителя 
+`export type TFormOrder = TFormStatus & TFormPayment`
+
+ -  Интерфейс кнопочного переключателя для формы 
+    ```typescript
+    export interface IFormToggler {
+        controls: HTMLButtonElement[]; // список кнопок переключателя
+        input: HTMLInputElement; // скрытый инпут
+        set activeButton(value: string); // установить активную кнопку
+    }
+    ```
+ -  ТИп данных для render в OrderSuccessView 
+    ```typescript
+    export type TOrderSuccess = {
+        total: string; // Сообщение об итоговой сумме списания
+    };
+    ```
+ **Типы данных и интерфейсы требуемые Презентеру**
+
+ -  Интерфейс модели каталога требуемый Презентеру 
+    ```typescript
+    export interface ICatalogueModel {
+        setProducts(productsList: IProduct[]): void;
+        setSelectedProduct(product: IProduct): void;
+    }
+    ```
+ - Интерфейс модели корзины требуемый Презентеру 
+    ```typescript
+    export interface ICartModel {
+        getProducts(): IProduct[];
+        addProduct(product: IProduct): void;
+        removeProduct(product: IProduct): void;
+        clearProducts(): void;
+        getFullCost(): number;
+        getProdctsCount(): number;
+        hasProduct(id: string): boolean;
+    }
+    ```
+ -  Интерфейс модели данных покупателя требуемый Презентеру 
+    ```typescript
+    export interface IBuyerModel {
+        setData(fields: Partial<IBuyer>): void;
+        getData(): IBuyer;
+        clearData(): void;
+        validateData(): Partial<TValidationErrorMessages<IBuyer>>;
+    }
+    ```
+ - Общий интерфейс требуемый Презентеру от слоя Модель 
+    ```typescript
+    export interface IModels {
+        catalogue: ICatalogueModel;
+        cart: ICartModel;
+        buyer: IBuyerModel;
+    };
+    ```
+ - Дженерик интерфейс инстанса компонента Представления 
+    ```typescript
+    export interface IComponent<T> {
+        render(data?: Partial<T>): HTMLElement;
+    }
+    ```
+ - Интерфейс Фабрики карточек 
+    ```typescript
+    export interface ICardFactory {
+        createCardCatalogue: (
+            actions: TCardActions,
+        ) => IComponent<TCardCatalogueView>;
+        createCardCart: (actions: TCardActions) => IComponent<TCardCartView>;
+        createCardPreview: (actions?: TCardActions) => IComponent<TCardPreviewView>;
+    }
+    ```
+ - Интерфейс требуемый Презентеру от слоя Представления 
+    ```typescript
+    export interface IView {
+        gallery: IComponent<TGallery>;
+        modal: IComponent<TModal>;
+        header: IComponent<THeader>;
+        cart: IComponent<TCart>;
+        formOrder: IComponent<TFormOrder>;
+        formContacts: IComponent<TFormStatus>;
+        orderSuccess: IComponent<TOrderSuccess>;
+        cardFactory: ICardFactory;
+    }
+    ```
+ -  Интерфейс Апи требуемый Презентеру для обмена с сервером 
+    ```typescript
+    export interface IProductApi {
+        getProducts(): Promise<IProduct[]>;
+        postOrder(
+            items: IProduct["id"][],
+            total: number,
+            buyer: IBuyer,
+        ): Promise<IOrderResponse>;
+    }
+    ```
+**Интерфейсы конструкторов**
+ - Дженерик интерфейс конструктора компонента, принимающего коллбэк с эмиттером 
+    ```typescript
+    export interface IComponentWithEventCallbackParamConstructor<T, V extends Partial<TActions> | undefined > {
+        new (container: HTMLElement, actions: V): IComponent<T>
+    }
+    ```
+ - Дженерик интерфейс конструктора компонента, принимающего брокер событий 
+    ```typescript
+    export interface IComponentWithEmitterParamConstructor<T> {
+        new (events: IEvents, container: HTMLElement,): IComponent<T>
+    }
+    ```
+
+ - Интерфейс конструктора карточек для корзины 
+    ```typescript
+    export type TCardCartConstructor =  IComponentWithEventCallbackParamConstructor<TCardCartView, TCardActions>`
+    ```
+ - Интерфейс конструктора карточек для превью 
+    ```typescript
+    export type TCardPreviewConstructor = IComponentWithEventCallbackParamConstructor<TCardPreviewView, TCardActions | undefined>`
+    ```
+ - Интерфейс конструктора карточек для каталога 
+    ```typescript
+    export type TCardCatalogueConstructor = IComponentWithEventCallbackParamConstructor<TCardCartView, TCardActions>`
     ```
 
 ### Модели данных
@@ -264,34 +544,6 @@ Presenter - презентер содержит основную логику п
 - `private notify(): void` - эмитирует событие `model:buyer:update` через брокер событий. Высылает данные формата `TBuyerData` (сохраненные данные и результаты валидации).
 
 ### Слой коммуникации
-
-#### Интерфейсы и типы данных
-
-- **IOrder** - определяет набор полей при отправке запроса с заказом на сервер, расширяет интерфейс IByer (данные покупателя)
-
-    ```typescript
-    interface IOrder extends IBuyer {
-        total: number; // - итоговая стоимость товаров в заказе
-        items: IProduct["id"][];
-    } // - массив с id товаров в заказзе
-    ```
-
-- **IProductResponse** типизирует данные, получаемые от сервера в ответ на запрос товаров каталога
-
-    ```typescript
-    interface IProductResponse {
-        total: number; // - количество товаров в ответе
-        items: IProduct[]; // - массив объектов товаров
-    }
-    ```
-
-- **IOrderResponse** типизирует данные, получаемые от сервера в ответ на запрос с заказом
-    ```typescript
-    interface IOrderResponse {
-        id: string; // - id заказа
-        total: number; // - итоговая сумма оплаты
-    }
-    ```
 
 #### Класс ProductApi
 
