@@ -42,4 +42,14 @@ export const paymentTypeMap: TPaymentMap = {
   "": ""
 }
 
+// Селекторы 
+
+export const VIEW_SELECTORS = {
+  CARD: {
+    CATALOGUE: "#card-catalog",
+    CART: "#card-basket",
+    PREVIEW: '#card-preview'
+  }
+}
+
 
