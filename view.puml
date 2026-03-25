@@ -5,8 +5,20 @@
 ' skinparam nodesep 20
 'skinparam ranksep 20
 
+ together {
+   class CardView
+   class GalleryView
+ }
 
-abstract class Component<T> {
+ together {
+   class FormView
+   class HeaderView
+ }
+
+interface IComponent<T> {
+  render(data?: Partial<T>): HTMLElement
+}
+abstract class Component<T> implements IComponent{
   # container: HTMLElement
   # setImage(element: HTMLImageElement, src: string, alt?: string): void
   + render(data?: Partial<T>): HTMLElement
@@ -18,7 +30,7 @@ class HeaderView {
   -cartCounter: HTMLElement
   + set counter(value: number)
 }
-HeaderView -left-|> Component
+
 
 '---Каталог ---'
 
@@ -26,16 +38,15 @@ class GalleryView {
   -catalogueElement: HTMLElement
   + set catalogue(items: HTMLElement[])
 }
-GalleryView -right-|> Component
+
 
 '------Модалка---------'
 
 class ModalView extends Component {
   -closeButton: HTMLButtonElement
   -contentContainer: HTMLElement
-  + set content(item: HTMLElement)
-  + open(): void
-  + close(): void
+  + set content(HTMLElement)
+  + set open(boolean): void
 }
 
 '-----Карточки------'
@@ -44,6 +55,7 @@ class ModalView extends Component {
 abstract class CardView<T> extends Component {
   #titleElement: HTMLElement
   #priceElement: HTMLElement
+  #mainActionElement: HTMLElement,
 
   + set title(string)
   + set price(string)
@@ -60,7 +72,6 @@ abstract class CardExtView<T> extends CardView {
 }
 
 class CardCatalogueView extends CardExtView {
-  -showPreviewElement: HTMLElement
 }
 
 '-----Карточка для превью---'
@@ -71,7 +82,7 @@ class CardPreviewView extends CardExtView {
   -orderButton: HTMLButtonElement
 
   + set description(string)
-  + set orderButtonState({ text: string; disabled: boolean })
+  + set state(string)
 }
 
 
@@ -87,9 +98,9 @@ class CartView extends Component {
   -productsList: HTMLUListElement
   -orderButton: HTMLButtonElement
   -priceElement: HTMLElement
-  + set products(items: HTMLElement[])
-  + set cartPrice(value: number)
-  + set isCanOrder(value: boolean)
+  + set products(HTMLElement[])
+  + set cartPrice(number)
+  + set isCanOrder(boolean)
 }
 
 '-----Кнопки----'
@@ -104,7 +115,7 @@ class FormTogglerButtons implements IFormToggler{
 interface IFormToggler {
   controls: HTMLButtonElement[];
   input: HTMLInputElement;
-  set activeButton(value: string);
+  set activeButton(string);
 }
 
 ' FormTogglerButtons -left-> IFormToggler
@@ -116,15 +127,16 @@ abstract class FormView<T> extends Component {
   #submitButton: HTMLButtonElement;
   #errorsElement: HTMLElement;
   +set isSubmitDisabled(boolean)
-  +set errors(string)
+  +set errors(string);
+  +set reset(boolean);
 }
 
 class FormOrderView extends FormView {
   -paymentToggler: IFormToggler
-  + set payment(string)
+  + set payment(string);
+  + set reset(boolean);
 }
 
-FormOrderView o.."1" IFormToggler
 
 class FormContactsView extends FormView {
 }
@@ -142,7 +154,39 @@ interface IEvents {
     trigger(string, context?): (data: T) => void;
 }
 
+
+class CardFactory {
+        - cardCart: TCardCartConstructor = CardCartView
+        - cardPreview: TCardPreviewConstructor = CardPreviewView
+        - cardCatalogue: TCardCatalogueConstructor = CardPreviewView
+    + createCardCart(actions: TCardActions): IComponent<TCardCartView>; 
+    + createCardPreview(actions?: TCardActions): IComponent<TCardPreviewView>;
+    +createCardCatalogue(actions: TCardActions): IComponent<TCardCatalogueView>; 
+
+}
+
+interface TCardCartConstructor  
+interface TCardPreviewConstructor 
+interface TCardCatalogueConstructor
+interface ICardFactory
+
+HeaderView --|> Component
+GalleryView --|> Component
+
+FormOrderView o.."1" IFormToggler
 ModalView o.."1" IEvents
+HeaderView o.."1" IEvents
+FormView o.."1" IEvents
+CartView o.."1" IEvents
+OrderSuccessView o.."1" IEvents
+
+CardFactory o.up."1" TCardCartConstructor
+CardFactory o.up."1" TCardPreviewConstructor
+CardFactory o.up."1" TCardCatalogueConstructor
+CardFactory ..|>ICardFactory
+CardCartView -- TCardCartConstructor
+CardPreviewView -- TCardPreviewConstructor
+CardCatalogueView -- TCardCatalogueConstructor
 
 'hide <<interface>>
 'hide class circle
