@@ -10,7 +10,7 @@ export class ModalView extends Component<TModal> {
     private closeButton: HTMLButtonElement;
     private contentContainer: HTMLElement;
     /**
-     * @constructor создает экземпляр Модального кна
+     * @constructor создает экземпляр Модального окна
      * @param events - интерфейс брокера событий
      * @param container - контейнер модального окна
      */

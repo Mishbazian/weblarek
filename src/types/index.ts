@@ -1,7 +1,8 @@
 import { IEvents } from "../components/base/Events";
 
+/** Методы запросов к API */
 export type ApiPostMethods = "POST" | "PUT" | "DELETE";
-
+/** Интерфейс базового API */
 export interface IApi {
     get<T extends object>(uri: string): Promise<T>;
     post<T extends object>(
@@ -266,3 +267,9 @@ export type TCardCartConstructor =  IComponentWithEventCallbackParamConstructor<
 export type TCardPreviewConstructor = IComponentWithEventCallbackParamConstructor<TCardPreviewView, TCardActions | undefined>
 /**Интерфейс конструктора карточек для каталога */
 export type TCardCatalogueConstructor = IComponentWithEventCallbackParamConstructor<TCardCartView, TCardActions>
+
+export type THeaderConstructor = IComponentWithEmitterParamConstructor<THeader>
+export type TGalleryConstructor = IComponentWithEmitterParamConstructor<TGallery>
+export type TModalConstructor = IComponentWithEmitterParamConstructor<TModal>
+export type TCartConstructor = IComponentWithEmitterParamConstructor<TCart>
+export type TFormOrderConstructor = IComponentWithEmitterParamConstructor<TFormOrder>

@@ -71,11 +71,9 @@ export class Presenter {
             );
         });
         emitter.on<FormData>(/^form:(\w*):change$/, (formData) =>{
-            console.log("chhhhhhaaaaaaaaange")
             this.updateBuyer(formData)}
         );
         emitter.on<TBuyerData>("model:buyer:update", (buyerData) => {
-            console.log("aaaa--yeeee")
             if (this.currentModal === EModalState.form_order) {
                 const payment: TOrderPayment =
                     paymentTypeMap[buyerData.data.payment];
