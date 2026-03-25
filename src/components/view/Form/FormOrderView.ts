@@ -1,16 +1,7 @@
-import { TFormPayment } from "../../../types";
+import { IFormToggler, TFormPayment } from "../../../types";
 import { IEvents } from "../../base/Events";
 import { FormTogglerButtons } from "./FormTogglerButtons";
 import { FormView } from "./FormView";
-
-/**
- * интерфейс для кнопочного переключателя формы
- */
-export interface IFormToggler {
-    controls: HTMLButtonElement[]; // список кнопок переключателя
-    input: HTMLInputElement; // скрытый инпут
-    set activeButton(value: string); // установить активную кнопку
-}
 
 /**
  * форма выбора способа оплаты и адреса доставки (наследует `FormView<TFormPayment>`). Использует `FormTogglerButtons` через композицию.
