@@ -70,10 +70,12 @@ export class Presenter {
                 EModalState.form_order,
             );
         });
-        emitter.on<FormData>(/^form:(\w*):change$/, (formData) =>
-            this.updateBuyer(formData),
+        emitter.on<FormData>(/^form:(\w*):change$/, (formData) =>{
+            console.log("chhhhhhaaaaaaaaange")
+            this.updateBuyer(formData)}
         );
         emitter.on<TBuyerData>("model:buyer:update", (buyerData) => {
+            console.log("aaaa--yeeee")
             if (this.currentModal === EModalState.form_order) {
                 const payment: TOrderPayment =
                     paymentTypeMap[buyerData.data.payment];
@@ -131,8 +133,9 @@ export class Presenter {
         const data = Object.fromEntries(formData);
         if (typeof data.payment === "string") {
             data.payment = getKeyByValue(data.payment, paymentTypeMap);
-            this.model.buyer.setData(data);
+            
         }
+        this.model.buyer.setData(data);
     }
     private renderGallery(data: IProduct[]): void {
         const cardList: HTMLElement[] = data.map((item) => {
