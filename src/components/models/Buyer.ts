@@ -65,10 +65,5 @@ export class Buyer {
             data: this.data,
             errors: this.validateData(),
         });
-        console.log(
-             {
-            data: this.data,
-            errors: this.validateData(),}
-        )
     }
 }

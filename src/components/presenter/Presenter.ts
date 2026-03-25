@@ -1,152 +1,80 @@
 import {
-    IBuyer,
-    IOrderResponse,
     IProduct,
+    IProductApi,
+    IView,
     TBuyerData,
     TCardActions,
-    TCardCartView,
-    TCardCatalogueView,
-    TCardPreview,
     TCardProduct,
-    TCart,
     TCartData,
-    TFormOrder,
-    TFormStatus,
-    TGallery,
-    THeader,
-    TModal,
+    IModels,
     TOrderButtonState,
     TOrderPayment,
-    TOrderSuccess,
-    TValidationErrorMessages,
 } from "../../types";
 import { CDN_URL, paymentTypeMap } from "../../utils/constants";
-import { cloneTemplate, objectToString } from "../../utils/utils";
+import { getKeyByValue, objectToString } from "../../utils/utils";
 
 import { IEvents } from "../base/Events";
-import { CardCartView } from "../view/Card/CardCartView";
 
-interface ICatalogueModel {
-    getProducts(): IProduct[];
-    getSelectedProduct(): IProduct | null;
-    getProductById(id: IProduct["id"]): IProduct | undefined;
-    setProducts(productsList: IProduct[]): void;
-    setSelectedProduct(product: IProduct): void;
-}
-interface ICartModel {
-    getProducts(): IProduct[];
-    addProduct(product: IProduct): void;
-    removeProduct(product: IProduct): void;
-    clearProducts(): void;
-    getFullCost(): number;
-    getProdctsCount(): number;
-    hasProduct(id: string): boolean;
-}
-
-interface IBuyerModel {
-    setData(fields: Partial<IBuyer>): void;
-    getData(): IBuyer;
-    clearData(): void;
-    validateData(): Partial<TValidationErrorMessages<IBuyer>>;
-}
-type TModels = {
-    catalogue: ICatalogueModel;
-    cart: ICartModel;
-    buyer: IBuyerModel;
-};
-export interface IComponent<T> {
-    render(data?: Partial<T>): HTMLElement;
-}
-
-export type TView = {
-    gallery: IComponent<TGallery>;
-    modal: IComponent<TModal>;
-    header: IComponent<THeader>;
-    cart: IComponent<TCart>;
-    formOrder: IComponent<TFormOrder>;
-    formContacts: IComponent<TFormStatus>;
-    orderSuccess: IComponent<TOrderSuccess>;
-    cardFactory: ICardFactory;
-};
-
-export interface ICardFactory {
-    createCardCatalogue: (
-        actions: TCardActions,
-    ) => IComponent<TCardCatalogueView>;
-    createCardCart: (actions: TCardActions) => IComponent<TCardCartView>;
-    createCardPreview: (actions?: TCardActions) => IComponent<TCardPreview>;
-}
-
-interface IProductApi {
-    getProducts(): Promise<IProduct[]>;
-    postOrder(
-        items: IProduct["id"][],
-        total: number,
-        buyer: IBuyer,
-    ): Promise<IOrderResponse>;
-}
-enum ECurrentModal {
+enum EModalState {
     "close",
     "cart",
     "preview",
-    "form:order",
-    "form:contacts",
-    "order:success",
+    "form_order",
+    "form_contacts",
+    "order_success",
 }
+
 export class Presenter {
-    private currentModal: ECurrentModal = ECurrentModal.close;
+    private currentModal: EModalState = EModalState.close;
     constructor(
         private emitter: IEvents,
         private api: IProductApi,
-        private model: TModels,
-        private view: TView,
+        private model: IModels,
+        private view: IView,
     ) {
-        this.emitter.on<IProduct[]>("model:catalogue:update", (data) =>
+        emitter.on<IProduct[]>("model:catalogue:update", (data) =>
             this.renderGallery(data),
         );
-        this.emitter.on<IProduct>("card:select", (item) => {
+        emitter.on<IProduct>("card:select", (item) => {
             this.model.catalogue.setSelectedProduct(item);
         });
-        this.emitter.on<IProduct>("model:catalogue:select", (product) =>
+        emitter.on<IProduct>("model:catalogue:select", (product) =>
             this.showCardPreview(product),
         );
-        this.emitter.on<IProduct>("card:action", (product) => {
+        emitter.on<IProduct>("card:action", (product) => {
             if (this.model.cart.hasProduct(product.id)) {
                 this.model.cart.removeProduct(product);
             } else {
                 this.model.cart.addProduct(product);
             }
-            this.modalClose();
+            emitter.trigger("model:cart:update");
+            //this.modalClose();
         });
-        this.emitter.on<TCartData>("model:cart:update", (cartData) => {
+        emitter.on<TCartData>("model:cart:update", (cartData) => {
             this.view.header.render({ counter: cartData.count });
             this.renderCart(cartData);
-            if (this.currentModal === ECurrentModal.preview) {
+            if (this.currentModal === EModalState.preview) {
                 this.modalClose();
             }
         });
-        this.emitter.on<IProduct>("cart:remove", (product) => {
+        emitter.on<IProduct>("cart:remove", (product) => {
             this.model.cart.removeProduct(product);
         });
-        this.emitter.on(/modal\:close|order\:complete/, () =>
-            this.modalClose(),
-        );
-        this.emitter.on("cart:show", () => {
-            this.view.modal.render({
-                content: this.view.cart.render(),
-                open: true,
-            });
-            this.currentModal = ECurrentModal.cart;
+        emitter.on(/modal\:close|order\:complete/, () => this.modalClose());
+        emitter.on("cart:show", () => {
+            this.showModal(this.view.cart.render(), EModalState.cart);
         });
-        this.emitter.on("order:create", () => {
-            this.view.modal.render({ content: this.view.formOrder.render() });
-            this.currentModal = ECurrentModal["form:order"];
+        emitter.on("order:create", () => {
+            this.showModal(
+                this.view.formOrder.render(),
+                EModalState.form_order,
+            );
         });
-        this.emitter.on<FormData>(/^form:(\w*):change$/, (formData) =>
+        emitter.on<FormData>(/^form:(\w*):change$/, (formData) =>
             this.updateBuyer(formData),
         );
-        this.emitter.on<TBuyerData>("model:buyer:update", (buyerData) => {
-            if (this.currentModal === ECurrentModal["form:order"]) {
+        emitter.on<TBuyerData>("model:buyer:update", (buyerData) => {
+            if (this.currentModal === EModalState.form_order) {
                 const payment: TOrderPayment =
                     paymentTypeMap[buyerData.data.payment];
                 const error = objectToString(
@@ -160,28 +88,21 @@ export class Presenter {
                     error,
                     isSubmitDisabled: error.length > 0,
                 });
-            } else if (this.currentModal === ECurrentModal["form:contacts"]) {
-                const error = objectToString(
-                    buyerData.errors,
-                    " ",
-                    "email",
-                    "phone",
-                );
+            } else if (this.currentModal === EModalState.form_contacts) {
+                const error = objectToString(buyerData.errors, " ");
                 this.view.formContacts.render({
                     error,
                     isSubmitDisabled: error.length > 0,
                 });
             }
         });
-        this.emitter.on("form:order:submit", () => {
-            this.view.modal.render({
-                content: this.view.formContacts.render({
-                    isSubmitDisabled: true,
-                }),
-            });
-            this.currentModal = ECurrentModal["form:contacts"];
+        emitter.on("form:order:submit", () => {
+            this.showModal(
+                this.view.formContacts.render(),
+                EModalState.form_contacts,
+            );
         });
-        this.emitter.on("form:contacts:submit", async () => {
+        emitter.on("form:contacts:submit", async () => {
             const response: Awaited<ReturnType<typeof this.api.postOrder>> =
                 await this.api.postOrder(
                     this.model.cart.getProducts().map((item) => {
@@ -193,10 +114,12 @@ export class Presenter {
             if (response) {
                 this.model.cart.clearProducts();
                 this.model.buyer.clearData();
+                this.view.formOrder.render({ reset: true });
+                this.view.formContacts.render({ reset: true });
                 const orderSuccess = this.view.orderSuccess.render({
                     total: `Списано ${response.total} синапсов`,
                 });
-                this.view.modal.render({ content: orderSuccess });
+                this.showModal(orderSuccess, EModalState.order_success);
             }
         });
     }
@@ -207,23 +130,16 @@ export class Presenter {
     private updateBuyer(formData: FormData): void {
         const data = Object.fromEntries(formData);
         if (typeof data.payment === "string") {
-            //@todo чтото здесь не так
-            data.payment = Object.fromEntries(
-                Object.entries(paymentTypeMap).map(([key, value]) => {
-                    return [value, key];
-                }),
-            )[data.payment];
+            data.payment = getKeyByValue(data.payment, paymentTypeMap);
+            this.model.buyer.setData(data);
         }
-        this.model.buyer.setData(data);
     }
     private renderGallery(data: IProduct[]): void {
-        const cardList: HTMLElement[] = [];
-
-        data.forEach((item) => {
+        const cardList: HTMLElement[] = data.map((item) => {
             const card = this.view.cardFactory.createCardCatalogue(
                 this.setClickAction("card:select", item),
             );
-            cardList.push(card.render(this.productToCard(item)));
+            return card.render(this.productToCard(item));
         });
 
         this.view.gallery.render({ catalogue: cardList });
@@ -241,15 +157,19 @@ export class Presenter {
                 ? this.setClickAction("card:action", product)
                 : undefined,
         );
-        const content = card.render({ ...this.productToCard(product), state });
-        this.view.modal.render({ content, open: true });
-        this.currentModal = ECurrentModal.preview;
+        this.showModal(
+            card.render({ ...this.productToCard(product), state }),
+            EModalState.preview,
+        );
+    }
+    private showModal(content: HTMLElement, currentModal: EModalState) {
+        this.view.modal.render({ content: content, open: true });
+        this.currentModal = currentModal;
     }
 
     private renderCart(cartData: TCartData): HTMLElement {
         const products = cartData.products.map((item, index) => {
-            const card = new CardCartView(
-                cloneTemplate("#card-basket"),
+            const card = this.view.cardFactory.createCardCart(
                 this.setClickAction("cart:remove", item),
             );
 
@@ -265,7 +185,7 @@ export class Presenter {
 
     private modalClose(): void {
         this.view.modal.render({ open: false });
-        this.currentModal = ECurrentModal.close;
+        this.currentModal = EModalState.close;
     }
 
     /**
@@ -278,7 +198,6 @@ export class Presenter {
         return {
             onClick: () => {
                 this.emitter.emit(`${eventName}`, item);
-                console.log(eventName);
             },
         };
     }
