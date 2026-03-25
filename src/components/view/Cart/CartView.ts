@@ -1,7 +1,8 @@
-import { TCart } from "../../types";
-import { ensureElement } from "../../utils/utils";
-import { Component } from "../base/Component";
-import { IEvents } from "../base/Events";
+import { TCart } from "../../../types";
+import { ensureElement } from "../../../utils/utils";
+import { Component } from "../../base/Component";
+import { IEvents } from "../../base/Events";
+
 
 /**
  * компонент корзины, отображает список товаров и общую стоимость. При клике кнопки заказа, вызывает полученную в конструкторе коллбэк-функцию.
@@ -10,7 +11,7 @@ export class CartView extends Component<TCart> {
     private productsList: HTMLUListElement;
     private orderButton: HTMLButtonElement;
     private priceElement: HTMLElement;
-    constructor(private events: IEvents, container: HTMLElement) {
+    constructor(container: HTMLElement, private events: IEvents) {
         super(container);
         this.productsList = ensureElement<HTMLUListElement>(
             ".basket__list",

@@ -1,14 +1,15 @@
-import { TOrderSuccess } from "../../types";
-import { ensureElement } from "../../utils/utils";
-import { Component } from "../base/Component";
-import { IEvents } from "../base/Events";
+import { TOrderSuccess } from "../../../types";
+import { ensureElement } from "../../../utils/utils";
+import { Component } from "../../base/Component";
+import { IEvents } from "../../base/Events";
+
 
 /**
  * Окно сообщения об успешном оформлениии заказа. Расширяет Component элементом сообщения. Устанавливает слушатель события `click` на кнопку закрытия окна с обработчиком, полученным в конструкторе.
  */
 export class OrderSuccessView extends Component<TOrderSuccess> {
     private totalElement: HTMLElement;
-    constructor(private events: IEvents, container: HTMLElement) {
+    constructor(container: HTMLElement, private events: IEvents) {
         super(container);
         this.totalElement = ensureElement(
             ".order-success__description",

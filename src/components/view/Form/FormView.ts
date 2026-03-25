@@ -15,7 +15,10 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
      * @param {HTMLElement} container - контейнер содержащий форму
      * @param {TFormActions} actions -  объект, содержащий коллбэк-функции для обработки событий.
      */
-    constructor(private events: IEvents, container: HTMLElement) {
+    constructor(
+        container: HTMLElement,
+        private events: IEvents,
+    ) {
         super(container);
 
         this.submitButton = ensureElement<HTMLButtonElement>(
@@ -26,16 +29,23 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
         this.form = this.container as HTMLFormElement;
 
         this.form.addEventListener("change", () => {
-            events.emit(`form:${this.form.name}:change`, new FormData(this.form))
+            events.emit(
+                `form:${this.form.name}:change`,
+                new FormData(this.form),
+            );
         });
 
-          this.form.addEventListener("submit", (e) => {
-              e.preventDefault();
-              this.events.emit(`form:${this.form.name}:submit`, new FormData(this.form));
-    })}
+        this.form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            this.events.emit(
+                `form:${this.form.name}:submit`,
+                new FormData(this.form),
+            );
+        });
+    }
 
     set isSubmitDisabled(value: boolean) {
-        console.log("want next ", value)
+        console.log("want next ", value);
         this.submitButton.disabled = value;
     }
 

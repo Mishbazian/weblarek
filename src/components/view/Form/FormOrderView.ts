@@ -22,8 +22,8 @@ export class FormOrderView extends FormView<TFormPayment> {
      * @param {HTMLElement} container - ссылка на DOM элемент содержащий форму
      * @param {object} actions - объект с коллбэк-функциями для обработки событий формы
      */
-    constructor(events: IEvents, container: HTMLElement) {
-        super(events, container);
+    constructor(container: HTMLElement, events: IEvents) {
+        super(container, events);
         this.paymentToggler = new FormTogglerButtons(
             container,
             ".button_alt", // селектор кнопок переключателя

@@ -1,7 +1,7 @@
-import { THeader } from "../../types";
-import { ensureElement } from "../../utils/utils";
-import { Component } from "../base/Component";
-import { IEvents } from "../base/Events";
+import { THeader } from "../../../types";
+import { ensureElement } from "../../../utils/utils";
+import { Component } from "../../base/Component";
+import { IEvents } from "../../base/Events";
 
 /**
  * Компонент заголовка страницы.
@@ -18,8 +18,8 @@ export class HeaderView extends Component<THeader> {
      * @param container - HTML-элемент, в который встроен заголовок.
      */
     constructor(
-        protected events: IEvents,
         container: HTMLElement,
+        private events: IEvents,
     ) {
         super(container);
         this.cartButton = ensureElement<HTMLButtonElement>(

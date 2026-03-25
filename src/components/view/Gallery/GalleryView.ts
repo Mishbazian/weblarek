@@ -1,5 +1,6 @@
-import { TGallery } from "../../types";
-import { Component } from "../base/Component";
+import { TGallery } from "../../../types";
+import { Component } from "../../base/Component";
+
 
 /**
  * контейнер для карточек каталога.
