@@ -204,3 +204,16 @@ export function objectToString<T extends Record<string, string | number>>(
         })
         .join(separator);
 }
+
+
+/**в простом строковом объекте дает получить ключ по значению */
+export function getKeyByValue(
+    value: string,
+    obj: Record<string | number, string | number>,
+) {
+    return Object.fromEntries(
+        Object.entries(obj).map(([key, value]) => {
+            return [value, key];
+        }),
+    )[value];
+}
