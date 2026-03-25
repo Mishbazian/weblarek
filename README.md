@@ -588,6 +588,22 @@ constructor(
 
 - `set total(value: string)` – устанавливает текст с итоговой стоимостью заказа
 
+#### Класс CardFactory
+- фабрика создания карточек. Реализует интерфейс ICardFactory для предоставления методов Презентеру.
+
+Конструктор:\
+
+    ```typescript
+    constructor(        
+        private cardCart: TCardCartConstructor = CardCartView, // - интерфейс конструктора компонента карточек для корзины
+        private cardPreview: TCardPreviewConstructor = CardPreviewView, // - интерфейс конструктора компонента карточек для превью
+        private cardCatalogue: TCardCatalogueConstructor = CardPreviewView, // - интерфейс конструктора компонента карточек для каталога
+    ) {}
+    ```
+Методы:\
+    `createCardCart(actions: TCardActions): IComponent<TCardCartView>` - принимает коллбэк для эмитирования событий, возвращает карточку для Корзины 
+    `createCardPreview(actions?: TCardActions): IComponent<TCardPreviewView>` - принимает коллбэк для эмитирования событий, возвращает карточку для Превью 
+    `createCardCatalogue(actions: TCardActions): IComponent<TCardCatalogueView>` - принимает коллбэк для эмитирования событий, возвращает карточку для Каталога
 
 ### События (Events)
 #### События Моделей данных:
@@ -618,7 +634,7 @@ constructor(
 - закрытие модального окна ModalView кнопкой или кликом вне области `modal:close`
 
 ### Презентер 
-Основная логика приложения реализована отдельным классом Presenter.
+Основная логика приложения реализована отдельным классом Presenter. Через брокер прослушивает события эмитируемые моделью и представлением. Вызывает методы изменения даннных в модели в ответ на события Представления, вызывает методы render Представления в ответ на события обновления данных в Модели.
 Поля:
 `currentModal: EModalState = EModalState.close` - состояние модального окна (по сути содержимое в настоящий момент). Возможные значения перечислены в `enum EModalState`
     ```typescript
@@ -642,6 +658,9 @@ constructor(
         private view: IView, // - интерфейс слоя Представления
     )
 ```
+Публичный метод
+`async updateCatalogue()` - используя метод getProducts интерфейса api запрашивает с сервера данные каталога продуктов
+
 
 
 
