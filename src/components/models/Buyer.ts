@@ -35,7 +35,6 @@ export class Buyer {
 
     setData(fields: Partial<IBuyer>): void {
         Object.assign(this.data, fields);
-        this.events.emit("buyer:update", this.getData());
         this.notify();
     }
 
@@ -66,5 +65,10 @@ export class Buyer {
             data: this.data,
             errors: this.validateData(),
         });
+        console.log(
+             {
+            data: this.data,
+            errors: this.validateData(),}
+        )
     }
 }
