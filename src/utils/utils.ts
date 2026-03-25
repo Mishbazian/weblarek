@@ -193,8 +193,12 @@ export function objectToString<T extends Record<string, string | number>>(
     separator: string = "",
     ...filter: (keyof T)[]
 ): string {
-    return Object.keys(obj)
-        .filter((key) => filter.includes(key))
+    const arr: (keyof T)[] =
+        filter.length > 0
+            ? Object.keys(obj).filter((key) => filter.includes(key))
+            : Object.keys(obj);
+
+    return arr
         .map((key) => {
             return obj[key].toString();
         })
