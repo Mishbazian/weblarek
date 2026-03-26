@@ -1,7 +1,6 @@
 import { TGallery } from "../../../types";
 import { Component } from "../../base/Component";
 
-
 /**
  * контейнер для карточек каталога.
  */
@@ -17,7 +16,6 @@ export class GalleryView extends Component<TGallery> {
         this.catalogueElement.replaceChildren();
 
         items.forEach((item) => {
-            ;
             this.catalogueElement.append(item);
         });
     }

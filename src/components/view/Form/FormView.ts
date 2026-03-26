@@ -37,10 +37,7 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
 
         this.form.addEventListener("submit", (e) => {
             e.preventDefault();
-            this.events.emit(
-                `form:${this.form.name}:submit`,
-                new FormData(this.form),
-            );
+            this.events.emit(`form:${this.form.name}:submit`);
         });
     }
 
@@ -52,9 +49,9 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
         this.errorsElement.textContent = message;
     }
 
-    set reset(value: boolean){
-        if(value)
-        {this.form.reset()
+    set reset(value: boolean) {
+        if (value) {
+            this.form.reset();
             this.errorsElement.textContent = "";
             this.submitButton.disabled = true;
         }
