@@ -12,13 +12,12 @@ export interface IApi {
     ): Promise<T>;
 }
 
-
 /**Вид оплаты в модели Buyer - набор предопределенных значений для выбора пользователем*/
 export type TPayment = "cash" | "online" | "";
 /**Вид оплаты в представлении FormOrderView */
 export type TOrderPayment = "cash" | "card" | "";
 /**Объект для приведения типов платежей в модели Buyer и в форме FormOrderView*/
-export type TPaymentMap = Record<TPayment, TOrderPayment>
+export type TPaymentMap = Record<TPayment, TOrderPayment>;
 
 /**определяет набор полей отдельного Товара в модели Catalogue.*/
 export interface IProduct {
@@ -34,7 +33,7 @@ export type TCartData = {
     products: IProduct[]; // массив товаров корзины
     price: number; // общая цена товаров в корзине
     count?: number; // количество товаров в корзине
-}
+};
 
 /** Данные покупателя */
 export interface IBuyer {
@@ -56,9 +55,9 @@ export type TValidationErrorMessages<T> = {
 };
 /** Тип данных высылаемых моделью Buyer вместе с событием */
 export type TBuyerData = {
-    data: IBuyer; 
+    data: IBuyer;
     errors: Partial<TValidationErrorMessages<IBuyer>>;
-}
+};
 
 /** Тип данных получаемых при запросе каталога продуктов */
 export interface IProductResponse {
@@ -116,18 +115,16 @@ export type TCardStates = Record<TOrderButtonState, string>;
 
 /**Тип данных для расширения данных карточки превью товара */
 export type TCardFull = Pick<TCardProduct, "description"> & {
-    state: TOrderButtonState;
+        state: TOrderButtonState;
 
 };
 /**Производные типы данных карточек, содержащие полный набор для отдельного компонента, включая данные родительского класса */
 /**Производный тип данных карточки товара для каталога, содержащий полный набор, включая данные родительского класса */
-export type TCardCatalogueView = TCardBaseInfo & TCardExtInfo
+export type TCardCatalogueView = TCardBaseInfo & TCardExtInfo;
 /**Производный тип данных карточки товара для превью, содержащий полный набор, включая данные родительского класса */
-export type TCardPreviewView = TCardBaseInfo & TCardExtInfo & TCardFull
+export type TCardPreviewView = TCardBaseInfo & TCardExtInfo & TCardFull;
 /**Производный тип данных карточки товара для корзины, содержащий полный набор, включая данные родительского класса */
-export type TCardCartView = TCardBaseInfo & TCardCartExt
-
-
+export type TCardCartView = TCardBaseInfo & TCardCartExt;
 
 /**Тип данных необходимых для render в CartView*/
 export type TCart = {
@@ -149,13 +146,11 @@ export type TActions = Record<TStandardEvents, TEventHandle>;
 /**Тип объекта с обработчикaми события для карточки*/
 export type TCardActions = Pick<TActions, "onClick">;
 
-
 /**Тип данных для рендера модального окна*/
 export type TModal = {
     content: HTMLElement; //содержимое модального окна
     open: boolean; // модальное окно открыть да/нет
 };
-
 
 //Типы для форм
 /** Объект данных принмаемых в render() FormView*/
@@ -165,14 +160,13 @@ export type TFormStatus = {
     reset: boolean; // - сбросить форму да/нет
 };
 
-
 /** Объект данных о типе платежа в форме */
 export type TFormPayment = {
     payment: TOrderPayment;
 };
 
 /** Производный тип объединяющий все данные принимаемые FormOrder, включая типы от класса родителя */
-export type TFormOrder = TFormStatus & TFormPayment
+export type TFormOrder = TFormStatus & TFormPayment;
 
 /** Интерфейс кнопочного переключателя для формы */
 export interface IFormToggler {
@@ -192,6 +186,7 @@ export type TOrderSuccess = {
 export interface ICatalogueModel {
     setProducts(productsList: IProduct[]): void;
     setSelectedProduct(product: IProduct): void;
+    getSelectedProduct(): IProduct | null;
 }
 
 /**Интерфейс модели корзины требуемый Презентеру */
@@ -217,7 +212,7 @@ export interface IModels {
     catalogue: ICatalogueModel;
     cart: ICartModel;
     buyer: IBuyerModel;
-};
+}
 
 /**Дженерик интерфейс инстанса компонента Представления */
 export interface IComponent<T> {
@@ -229,13 +224,13 @@ export interface ICardFactory {
         actions: TCardActions,
     ) => IComponent<TCardCatalogueView>;
     createCardCart: (actions: TCardActions) => IComponent<TCardCartView>;
-    createCardPreview: (actions?: TCardActions) => IComponent<TCardPreviewView>;
 }
 /**Интерфейс требуемый Презентеру от слоя Представления */
 export interface IView {
     gallery: IComponent<TGallery>;
     modal: IComponent<TModal>;
     header: IComponent<THeader>;
+    cardPreview: IComponent<TCardPreviewView>;
     cart: IComponent<TCart>;
     formOrder: IComponent<TFormOrder>;
     formContacts: IComponent<TFormStatus>;
@@ -254,22 +249,35 @@ export interface IProductApi {
 
 //Интерфейсы конструкторов
 /**Дженерик интерфейс конструктора компонента, принимающего коллбэк с эмиттером */
-export interface IComponentWithEventCallbackParamConstructor<T, V extends Partial<TActions> | undefined > {
-    new (container: HTMLElement, actions: V): IComponent<T>
+export interface IComponentWithEventCallbackParamConstructor<
+    T,
+    V extends Partial<TActions> | undefined,
+> {
+    new (container: HTMLElement, actions: V): IComponent<T>;
 }
 /**Дженерик интерфейс конструктора компонента, принимающего брокер событий */
 export interface IComponentWithEmitterParamConstructor<T> {
-    new (events: IEvents, container: HTMLElement,): IComponent<T>
+    new (events: IEvents, container: HTMLElement): IComponent<T>;
 }
 /**Интерфейс конструктора карточек для корзины */
-export type TCardCartConstructor =  IComponentWithEventCallbackParamConstructor<TCardCartView, TCardActions>
+export type TCardCartConstructor = IComponentWithEventCallbackParamConstructor<
+    TCardCartView,
+    TCardActions
+>;
 /**Интерфейс конструктора карточек для превью */
-export type TCardPreviewConstructor = IComponentWithEventCallbackParamConstructor<TCardPreviewView, TCardActions | undefined>
+export type TCardPreviewConstructor =
+    IComponentWithEventCallbackParamConstructor<
+        TCardPreviewView,
+        TCardActions | undefined
+    >;
 /**Интерфейс конструктора карточек для каталога */
-export type TCardCatalogueConstructor = IComponentWithEventCallbackParamConstructor<TCardCartView, TCardActions>
+export type TCardCatalogueConstructor =
+    IComponentWithEventCallbackParamConstructor<TCardCartView, TCardActions>;
 
-export type THeaderConstructor = IComponentWithEmitterParamConstructor<THeader>
-export type TGalleryConstructor = IComponentWithEmitterParamConstructor<TGallery>
-export type TModalConstructor = IComponentWithEmitterParamConstructor<TModal>
-export type TCartConstructor = IComponentWithEmitterParamConstructor<TCart>
-export type TFormOrderConstructor = IComponentWithEmitterParamConstructor<TFormOrder>
+export type THeaderConstructor = IComponentWithEmitterParamConstructor<THeader>;
+export type TGalleryConstructor =
+    IComponentWithEmitterParamConstructor<TGallery>;
+export type TModalConstructor = IComponentWithEmitterParamConstructor<TModal>;
+export type TCartConstructor = IComponentWithEmitterParamConstructor<TCart>;
+export type TFormOrderConstructor =
+    IComponentWithEmitterParamConstructor<TFormOrder>;

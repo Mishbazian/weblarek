@@ -38,18 +38,12 @@ export class Presenter {
         emitter.on<IProduct>("card:select", (item) => {
             this.model.catalogue.setSelectedProduct(item);
         });
-        emitter.on<IProduct>("model:catalogue:select", (product) =>
-            this.showCardPreview(product),
-        );
-        emitter.on<IProduct>("card:action", (product) => {
-            if (this.model.cart.hasProduct(product.id)) {
-                this.model.cart.removeProduct(product);
-            } else {
-                this.model.cart.addProduct(product);
-            }
-            emitter.trigger("model:cart:update");
-            //this.modalClose();
+        emitter.on<IProduct>("model:catalogue:select", (product) => {
+            this.renderPreview(product);
         });
+        emitter.on<IProduct>("card:action", () =>
+            this.toggleSelectedProductInCart(),
+        );
         emitter.on<TCartData>("model:cart:update", (cartData) => {
             this.view.header.render({ counter: cartData.count });
             this.renderCart(cartData);
@@ -70,8 +64,8 @@ export class Presenter {
                 EModalState.form_order,
             );
         });
-        emitter.on<FormData>(/^form:(\w*):change$/, (formData) =>{
-            this.updateBuyer(formData)}
+        emitter.on<FormData>(/^form:(\w*):change$/, (formData) =>
+            this.updateBuyer(formData),
         );
         emitter.on<TBuyerData>("model:buyer:update", (buyerData) => {
             if (this.currentModal === EModalState.form_order) {
@@ -123,15 +117,26 @@ export class Presenter {
             }
         });
     }
-    async updateCatalogue() {
+    async updateCatalogue(): Promise<void> {
         const productsList = await this.api.getProducts();
         this.model.catalogue.setProducts(productsList);
+    }
+    /** to Buy or not to Buy */
+    private toggleSelectedProductInCart(): void {
+        const currentProduct: IProduct | null =
+            this.model.catalogue.getSelectedProduct();
+        if (currentProduct) {
+            if (this.model.cart.hasProduct(currentProduct.id)) {
+                this.model.cart.removeProduct(currentProduct);
+            } else {
+                this.model.cart.addProduct(currentProduct);
+            }
+        }
     }
     private updateBuyer(formData: FormData): void {
         const data = Object.fromEntries(formData);
         if (typeof data.payment === "string") {
             data.payment = getKeyByValue(data.payment, paymentTypeMap);
-            
         }
         this.model.buyer.setData(data);
     }
@@ -146,20 +151,19 @@ export class Presenter {
         this.view.gallery.render({ catalogue: cardList });
     }
 
-    private showCardPreview(product: IProduct): void {
+    private renderPreview(product: IProduct): void {
         const state: TOrderButtonState =
             product.price === null
                 ? "disabled"
                 : this.model.cart.hasProduct(product.id)
                   ? "remove"
                   : "add";
-        const card = this.view.cardFactory.createCardPreview(
-            state !== "disabled"
-                ? this.setClickAction("card:action", product)
-                : undefined,
-        );
+
         this.showModal(
-            card.render({ ...this.productToCard(product), state }),
+            this.view.cardPreview.render({
+                ...this.productToCard(product),
+                state,
+            }),
             EModalState.preview,
         );
     }

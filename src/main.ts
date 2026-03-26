@@ -17,7 +17,7 @@ import { HeaderView } from "./components/view/Header/HeaderView";
 import { ModalView } from "./components/view/Modal/ModalView";
 import { OrderSuccessView } from "./components/view/Order/OrderSuccessView";
 import "./scss/styles.scss";
-import { ICardFactory, IView } from "./types";
+import { ICardFactory, IModels, IView } from "./types";
 
 import { API_URL } from "./utils/constants";
 import { cloneTemplate, ensureElement } from "./utils/utils";
@@ -26,7 +26,7 @@ import { cloneTemplate, ensureElement } from "./utils/utils";
 const api = new ProductApi(new Api(API_URL));
 const emitter = new EventEmitter();
 //инстансы моделей
-const models = {
+const models: IModels = {
     catalogue: new Catalogue(emitter),
     cart: new Cart(emitter),
     buyer: new Buyer(emitter),
@@ -36,13 +36,14 @@ const models = {
 const gallery = new GalleryView(ensureElement(".gallery"));
 const modal = new ModalView(ensureElement(".modal"), emitter);
 const header = new HeaderView(ensureElement(".header"), emitter);
+const cardPreview = new CardPreviewView(cloneTemplate("#card-preview"), emitter)
 const formOrder = new FormOrderView(cloneTemplate("#order"), emitter);
 const formContacts = new FormContactsView(cloneTemplate("#contacts"), emitter);
+
 const cart = new CartView(cloneTemplate("#basket"), emitter);
 const orderSuccess = new OrderSuccessView(cloneTemplate("#success"), emitter);
 const cardFactory: ICardFactory = new CardFactory(
     CardCartView,
-    CardPreviewView,
     CardCatalogueView,
 );
 
@@ -50,6 +51,7 @@ const view: IView = {
     header,
     modal,
     gallery,
+    cardPreview,
     cart,
     formOrder,
     formContacts,

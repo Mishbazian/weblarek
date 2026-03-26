@@ -1,6 +1,7 @@
-import { TCardActions, TOrderButtonState, TCardFull } from "../../../types";
+import { TOrderButtonState, TCardFull } from "../../../types";
 import { cardActions } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
+import { IEvents } from "../../base/Events";
 import { CardExtView } from "./CardExtView";
 
 /**
@@ -14,14 +15,15 @@ export class CardPreviewView extends CardExtView<TCardFull> {
      * @param {HTMLElement} container - DOM элемент, содержащий структуру карточки
      * @param {object} actions - объект, содержащий коллбэк-функцию для обработки событий.
      */
-    constructor(container: HTMLElement, actions?: TCardActions) {
+    constructor(container: HTMLElement, events: IEvents) {
         const orderButton = ensureElement<HTMLButtonElement>(
             ".card__button",
             container,
         );
-        super(container, orderButton, actions);
+        super(container, orderButton);
         this.descriptionElement = ensureElement(".card__text", this.container);
         this.orderButton = orderButton;
+        this.orderButton.addEventListener('click', ()=>events.emit(`card:action`))
     }
 
     // установить текст описания

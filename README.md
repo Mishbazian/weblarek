@@ -341,6 +341,7 @@ Presenter - презентер содержит основную логику п
     export interface ICatalogueModel {
         setProducts(productsList: IProduct[]): void;
         setSelectedProduct(product: IProduct): void;
+        getSelectedProduct(): IProduct | null;
     }
     ```
  - Интерфейс модели корзины требуемый Презентеру 
@@ -385,7 +386,6 @@ Presenter - презентер содержит основную логику п
             actions: TCardActions,
         ) => IComponent<TCardCatalogueView>;
         createCardCart: (actions: TCardActions) => IComponent<TCardCartView>;
-        createCardPreview: (actions?: TCardActions) => IComponent<TCardPreviewView>;
     }
     ```
  - Интерфейс требуемый Презентеру от слоя Представления 
@@ -394,6 +394,7 @@ Presenter - презентер содержит основную логику п
         gallery: IComponent<TGallery>;
         modal: IComponent<TModal>;
         header: IComponent<THeader>;
+        cardPreview: IComponent<TCardPreviewView>;
         cart: IComponent<TCart>;
         formOrder: IComponent<TFormOrder>;
         formContacts: IComponent<TFormStatus>;
@@ -659,7 +660,7 @@ protected constructor(
 
 Конструктор:
 
-- `constructor(container: HTMLElement, actions?: TCardActions)` - принимает ссылку на DOM элемент, содержащий структуру карточки, и объект, содержащий коллбэк-функцию для обработки событий.
+- `constructor(container: HTMLElement, events: IEvents)` - принимает интерфейс брокера событий и ссылку на DOM элемент, содержащий структуру карточки.
 
 Поля:
 
@@ -669,7 +670,7 @@ protected constructor(
 Сеттеры:
 
 - `set description(value: string)` - установить текст описания,
-- `set orderButtonState(value: controlState)` – установить состояние кнопки. Здесь определяется какое действие с товаром доступно пользователю.
+- `set state(value: controlState)` – установить состояние карточки(кнопки). Здесь определяется какое действие с товаром доступно пользователю.
 
 #### Класс CardCartView
 
@@ -848,13 +849,11 @@ constructor(
     ```typescript
     constructor(        
         private cardCart: TCardCartConstructor = CardCartView, // - интерфейс конструктора компонента карточек для корзины
-        private cardPreview: TCardPreviewConstructor = CardPreviewView, // - интерфейс конструктора компонента карточек для превью
         private cardCatalogue: TCardCatalogueConstructor = CardPreviewView, // - интерфейс конструктора компонента карточек для каталога
     ) {}
     ```
 Методы:\
     `createCardCart(actions: TCardActions): IComponent<TCardCartView>` - принимает коллбэк для эмитирования событий, возвращает карточку для Корзины 
-    `createCardPreview(actions?: TCardActions): IComponent<TCardPreviewView>` - принимает коллбэк для эмитирования событий, возвращает карточку для Превью 
     `createCardCatalogue(actions: TCardActions): IComponent<TCardCatalogueView>` - принимает коллбэк для эмитирования событий, возвращает карточку для Каталога
 
 ### События (Events)
