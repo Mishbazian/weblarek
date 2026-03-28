@@ -28,11 +28,13 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
         this.errorsElement = ensureElement(".form__errors", this.container);
         this.form = this.container as HTMLFormElement;
 
-        this.form.addEventListener("input", () => {
-            events.emit(
-                `form:${this.form.name}:change`,
-                new FormData(this.form),
-            );
+        this.form.addEventListener("input", (e) => {
+            if (e.target instanceof HTMLInputElement) {
+                const input: HTMLInputElement = e.target;
+                events.emit(`form:${this.form.name}:change`, {
+                    [input.name]: input.value,
+                });
+            }
         });
 
         this.form.addEventListener("submit", (e) => {
@@ -43,10 +45,10 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
 
     set isSubmitDisabled(value: boolean) {
         this.submitButton.disabled = value;
+
     }
 
     set error(message: string) {
         this.errorsElement.textContent = message;
     }
-
 }

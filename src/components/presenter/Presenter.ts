@@ -2,30 +2,24 @@ import {
     IProduct,
     IProductApi,
     IView,
-    TBuyerData,
     TCardActions,
     TCardProduct,
     TCartData,
     IModels,
     TOrderButtonState,
-    TOrderPayment,
+    TFormContacts,
+    TFormOrder,
+    IBuyer,
+    TPayment,
+    TFormData,
+    TValidationErrorMessages,
 } from "../../types";
 import { CDN_URL, paymentTypeMap } from "../../utils/constants";
-import { getKeyByValue, objectToString } from "../../utils/utils";
+import { getKeyByValue } from "../../utils/utils";
 
 import { IEvents } from "../base/Events";
 
-enum EModalState {
-    "close",
-    "cart",
-    "preview",
-    "form_order",
-    "form_contacts",
-    "order_success",
-}
-
 export class Presenter {
-    private currentModal: EModalState = EModalState.close;
     constructor(
         private emitter: IEvents,
         private api: IProductApi,
@@ -41,76 +35,69 @@ export class Presenter {
         emitter.on<IProduct>("model:catalogue:select", (product) => {
             this.renderPreview(product);
         });
-        emitter.on<IProduct>("card:action", () =>
-            this.toggleSelectedProductInCart(),
-        );
+        emitter.on<IProduct>("card:action", () => {
+            this.toggleSelectedProductInCart();
+            this.modalClose();
+        });
         emitter.on<TCartData>("model:cart:update", (cartData) => {
             this.view.header.render({ counter: cartData.count });
             this.renderCart(cartData);
-            if (this.currentModal === EModalState.preview) {
-                this.modalClose();
-            }
         });
         emitter.on<IProduct>("cart:remove", (product) => {
             this.model.cart.removeProduct(product);
         });
         emitter.on(/modal\:close|order\:complete/, () => this.modalClose());
-        emitter.on("cart:show", () => {
-            this.showModal(this.view.cart.render(), EModalState.cart);
-        });
-        emitter.on("order:create", () => {
-            this.showModal(
-                this.view.formOrder.render(),
-                EModalState.form_order,
-            );
-        });
-        emitter.on<FormData>(/^form:(\w*):change$/, (formData) =>
-            this.updateBuyer(formData),
+        emitter.on("cart:show", () => this.showModal(this.view.cart.render()));
+        emitter.on("order:create", () =>
+            this.showModal(this.view.formOrder.render({ error: "" })),
         );
-        emitter.on<TBuyerData>("model:buyer:update", (buyerData) => {
-            if (this.currentModal === EModalState.form_order) {
-                const payment: TOrderPayment =
-                    paymentTypeMap[buyerData.data.payment];
-                const error = objectToString(
-                    buyerData.errors,
-                    "\n",
-                    "payment",
-                    "address",
-                );
+        emitter.on<Partial<TFormContacts & TFormOrder>>(
+            /^form:(\w*):change$/,
+            (data) => this.updateBuyer(data),
+        );
+        emitter.on<Partial<IBuyer>>("model:buyer:update", (data) => {
+            const formData: Partial<TFormData> = Object.fromEntries(
+                Object.entries(data).map(([key, value]) => {
+                    if (key === "payment") {
+                        return ["payment", paymentTypeMap[value as TPayment]];
+                    }
+                    return [key, value];
+                }),
+            );
+
+            const errObj: Partial<TValidationErrorMessages<IBuyer>> =
+                this.model.buyer.validateData();
+
+            if (
+                Object.hasOwn(formData, "payment") ||
+                Object.hasOwn(formData, "address")
+            ) {
+                const orderErr: string = [errObj.payment, errObj.address]
+                    .filter(Boolean)
+                    .join(" ");
                 this.view.formOrder.render({
-                    payment,
-                    address: buyerData.data.address,
-                    error,
-                    isSubmitDisabled: error.length > 0,
+                    ...formData,
+                    error: orderErr,
+                    isSubmitDisabled: orderErr.length > 0,
                 });
-            } else if (this.currentModal === EModalState.form_contacts) {
-                const error = objectToString(buyerData.errors, " ");
+            }
+            if (
+                Object.hasOwn(formData, "email") ||
+                Object.hasOwn(formData, "phone")
+            ) {
+                const contactsErr: string = [errObj.email, errObj.phone]
+                    .filter(Boolean)
+                    .join(" ");
+
                 this.view.formContacts.render({
-                    phone: buyerData.data.phone,
-                    email: buyerData.data.email,
-                    error,
-                    isSubmitDisabled: error.length > 0,
-                });
-            } else if (this.currentModal === EModalState.order_success) {
-              this.view.formOrder.render({
-                    payment: "",
-                    address: "",
-                    error: "",
-                    isSubmitDisabled: true,
-                });
-            this.view.formContacts.render({
-                    phone: "",
-                    email: "",
-                    error: "",
-                    isSubmitDisabled: true,
+                    ...formData,
+                    error: contactsErr,
+                    isSubmitDisabled: contactsErr.length > 0,
                 });
             }
         });
         emitter.on("form:order:submit", () => {
-            this.showModal(
-                this.view.formContacts.render(),
-                EModalState.form_contacts,
-            );
+            this.showModal(this.view.formContacts.render({ error: "" }));
         });
         emitter.on("form:contacts:submit", async () => {
             const response: Awaited<ReturnType<typeof this.api.postOrder>> =
@@ -125,10 +112,10 @@ export class Presenter {
                 const orderSuccess = this.view.orderSuccess.render({
                     total: `Списано ${response.total} синапсов`,
                 });
-                this.showModal(orderSuccess, EModalState.order_success);
+                this.showModal(orderSuccess);
                 this.model.cart.clearProducts();
                 this.model.buyer.clearData();
-            }   
+            }
         });
     }
     async updateCatalogue(): Promise<void> {
@@ -148,12 +135,16 @@ export class Presenter {
             }
         }
     }
-    private updateBuyer(formData: FormData): void {
-        const data = Object.fromEntries(formData);
-        if (typeof data.payment === "string") {
-            data.payment = getKeyByValue(data.payment, paymentTypeMap);
-        }
-        this.model.buyer.setData(data);
+    private updateBuyer(data: Partial<TFormContacts & TFormOrder>): void {
+        const buyerData: Partial<IBuyer> = Object.fromEntries(
+            Object.entries(data).map(([key, value]) => {
+                if (key === "payment") {
+                    return ["payment", getKeyByValue(value, paymentTypeMap)];
+                }
+                return [key, value];
+            }),
+        );
+        this.model.buyer.setData(buyerData);
     }
     private renderGallery(data: IProduct[]): void {
         const cardList: HTMLElement[] = data.map((item) => {
@@ -179,12 +170,10 @@ export class Presenter {
                 ...this.productToCard(product),
                 state,
             }),
-            EModalState.preview,
         );
     }
-    private showModal(content: HTMLElement, currentModal: EModalState) {
+    private showModal(content: HTMLElement) {
         this.view.modal.render({ content: content, open: true });
-        this.currentModal = currentModal;
     }
 
     private renderCart(cartData: TCartData): HTMLElement {
@@ -205,7 +194,6 @@ export class Presenter {
 
     private modalClose(): void {
         this.view.modal.render({ open: false });
-        this.currentModal = EModalState.close;
     }
 
     /**

@@ -184,13 +184,8 @@ Presenter - презентер содержит основную логику п
         [key in keyof T]: string;
     };
     ```
- -  Тип данных высылаемых моделью Buyer вместе с событием 
-    ```typescript
-    export type TBuyerData = {
-        data: IBuyer; 
-        errors: Partial<TValidationErrorMessages<IBuyer>>;
-    }
-    ```
+-  Тип объекта для render форм `export type TFormData = Partial<TFormContacts & TFormOrder>`
+
  -  Тип данных получаемых при запросе каталога продуктов 
     ```typescript
     export interface IProductResponse {
@@ -543,7 +538,7 @@ Presenter - презентер содержит основную логику п
 
 - `validateData(): Partial<TValidationErrorMessages<IBuyer>>` - проверяет поля экземпляра класса и возвращает объект с описаниями полученных ошибок валидации.
 
-- `private notify(): void` - эмитирует событие `model:buyer:update` через брокер событий. Высылает данные формата `TBuyerData` (сохраненные данные и результаты валидации).
+- `private notify(fields: Partial<IBuyer> ): void` - эмитирует событие `model:buyer:update` через брокер событий с измененными данными
 
 ### Слой коммуникации
 
@@ -748,7 +743,7 @@ protected constructor(
 #### Абстрактный класс FormView&lt;T&gt;
 
 - Базовый класс для отображения форм. Расширяет Component. Дженерик, принимает T - тип дополнительных данных формы для метода render().\
-Эмитирует браузерные события input и submit с данными формы через полученный в конструкторе интерфейс брокера сообщений и выводит сообщения об ошибках.
+Эмитирует браузерные события input и submit с измененными данными формы через полученный в конструкторе интерфейс брокера сообщений и выводит сообщения об ошибках.
 
 Конструктор:
 
@@ -768,7 +763,7 @@ protected constructor(
 
 #### Класс FormOrderView
 
-– форма выбора способа оплаты и адреса доставки (наследует `FormView<TFormPayment>`). Использует `FormTogglerButtons` через композицию. 
+– форма выбора способа оплаты и адреса доставки Расширяет `FormView<TFormOrder>` возможностями управления кнопками выбора формы оплат и инпутом ввода адреса. Эмитирует событие клика по кнопке как `form:order:change`.
 
 Конструктор:
 
@@ -777,7 +772,6 @@ protected constructor(
 Поля:
 
 - `paymentControls: HTMLButtonElement[];` - массив кнопок выбора способа платежа
-- `paymentInput: HTMLInputElement;` - скрытый инпут для записи и считывания способа платежа
 - `addressInput: HTMLInputElement;` - инпут для ввода адреса доставки
 
 Сеттеры:
@@ -872,18 +866,6 @@ interface IFormToggler {
 
 ### Презентер 
 Основная логика приложения реализована отдельным классом Presenter. Через брокер прослушивает события эмитируемые моделью и представлением. Вызывает методы изменения даннных в модели в ответ на события Представления, вызывает методы render Представления в ответ на события обновления данных в Модели.
-Поля:
-`currentModal: EModalState = EModalState.close` - состояние модального окна (по сути содержимое в настоящий момент). Возможные значения перечислены в `enum EModalState`
-    ```typescript
-    enum EModalState {
-        "close",
-        "cart",
-        "preview",
-        "form_order",
-        "form_contacts",
-        "order_success",
-    }
-    ```
 
 Конструктор:
 Параметры: 

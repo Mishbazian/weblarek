@@ -35,7 +35,7 @@ export class Buyer {
 
     setData(fields: Partial<IBuyer>): void {
         Object.assign(this.data, fields);
-        this.notify();
+        this.notify(fields);
     }
 
     getData(): IBuyer {
@@ -45,7 +45,7 @@ export class Buyer {
     clearData(): void {
         const freshBuyer = new Buyer(this.events);
         Object.assign(this.data, freshBuyer.data);
-        this.notify();
+        this.notify(this.data);
     }
 
     validateData(): Partial<TValidationErrorMessages<IBuyer>> {
@@ -60,10 +60,9 @@ export class Buyer {
         return res;
     }
 
-    private notify() {
+    private notify(fields:Partial<IBuyer>) {
         this.events.emit("model:buyer:update", {
-            data: this.data,
-            errors: this.validateData(),
+            ...fields,
         });
     }
 }

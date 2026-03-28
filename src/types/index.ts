@@ -53,11 +53,8 @@ export type TValidationRules<T> = {
 export type TValidationErrorMessages<T> = {
     [key in keyof T]: string;
 };
-/** Тип данных высылаемых моделью Buyer вместе с событием */
-export type TBuyerData = {
-    data: IBuyer;
-    errors: Partial<TValidationErrorMessages<IBuyer>>;
-};
+/** Тип объекта для render форм */
+export type TFormData = Partial<TFormContacts & TFormOrder>
 
 /** Тип данных получаемых при запросе каталога продуктов */
 export interface IProductResponse {

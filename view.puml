@@ -103,22 +103,6 @@ class CartView extends Component {
   + set isCanOrder(boolean)
 }
 
-'-----Кнопки----'
-
-class FormTogglerButtons implements IFormToggler{
-  -container: HTMLElement;
-  +controls: HTMLButtonElement[];
-  +input: HTMLInputElement;
-  +set activeButton(string);
-}
-
-interface IFormToggler {
-  controls: HTMLButtonElement[];
-  input: HTMLInputElement;
-  set activeButton(string);
-}
-
-' FormTogglerButtons -left-> IFormToggler
 
 '---Формы----'
 
@@ -128,17 +112,21 @@ abstract class FormView<T> extends Component {
   #errorsElement: HTMLElement;
   +set isSubmitDisabled(boolean)
   +set errors(string);
-  +set reset(boolean);
 }
 
 class FormOrderView extends FormView {
-  -paymentToggler: IFormToggler
+    -paymentControls: HTMLButtonElement[];
+    -addressInput: HTMLInputElement;
   + set payment(string);
-  + set reset(boolean);
+  + set address(value: string);
 }
 
 
 class FormContactsView extends FormView {
+    - phoneInput: HTMLInputElement;
+    - emailInput: HTMLInputElement;
+    + set phone(string)
+    + set email(string)
 }
 
 '----Заказ успешен--'
@@ -157,10 +145,8 @@ interface IEvents {
 
 class CardFactory {
         - cardCart: TCardCartConstructor = CardCartView
-        - cardPreview: TCardPreviewConstructor = CardPreviewView
         - cardCatalogue: TCardCatalogueConstructor = CardPreviewView
     + createCardCart(actions: TCardActions): IComponent<TCardCartView>; 
-    + createCardPreview(actions?: TCardActions): IComponent<TCardPreviewView>;
     +createCardCatalogue(actions: TCardActions): IComponent<TCardCatalogueView>; 
 
 }
@@ -173,7 +159,6 @@ interface ICardFactory
 HeaderView --|> Component
 GalleryView --|> Component
 
-FormOrderView o.."1" IFormToggler
 ModalView o.."1" IEvents
 HeaderView o.."1" IEvents
 FormView o.."1" IEvents
