@@ -311,23 +311,24 @@ Presenter - презентер содержит основную логику п
     };
     ```
 
- -  Объект данных о типе платежа в форме 
+ -  Объект данных принмаемых в render() FormOrderView 
     ```typescript
     export type TFormPayment = {
         payment: TOrderPayment;
+        address: string;
     };
     ```
- -  Производный тип объединяющий все данные принимаемые FormOrder, включая типы от класса родителя 
-`export type TFormOrder = TFormStatus & TFormPayment`
-
- -  Интерфейс кнопочного переключателя для формы 
-    ```typescript
-    export interface IFormToggler {
-        controls: HTMLButtonElement[]; // список кнопок переключателя
-        input: HTMLInputElement; // скрытый инпут
-        set activeButton(value: string); // установить активную кнопку
+ - Объект данных принмаемых в render() FormOrderView
+     ```typescript
+    export type TFormContacts = {
+        phone: string;
+        email: string;
     }
     ```
+ -  Производный тип объединяющий все данные принимаемые FormOrderView, включая типы от класса родителя 
+`export type TFormOrder = TFormStatus & TFormPayment`
+ -  Производный тип объединяющий все данные принимаемые FormContactsView, включая типы от класса родителя 
+`export type TFormContactsView = TFormStatus & TFormContacts`
  -  ТИп данных для render в OrderSuccessView 
     ```typescript
     export type TOrderSuccess = {
@@ -396,8 +397,8 @@ Presenter - презентер содержит основную логику п
         header: IComponent<THeader>;
         cardPreview: IComponent<TCardPreviewView>;
         cart: IComponent<TCart>;
-        formOrder: IComponent<TFormOrder>;
-        formContacts: IComponent<TFormStatus>;
+        formOrder: IComponent<TFormOrderView>;
+        formContacts: IComponent<TFormContactsView>;
         orderSuccess: IComponent<TOrderSuccess>;
         cardFactory: ICardFactory;
     }
@@ -747,7 +748,7 @@ protected constructor(
 #### Абстрактный класс FormView&lt;T&gt;
 
 - Базовый класс для отображения форм. Расширяет Component. Дженерик, принимает T - тип дополнительных данных формы для метода render().\
-Эмитирует браузерные события change и submit с данными формы через полученный в конструкторе интерфейс брокера сообщений и выводит сообщения об ошибках.
+Эмитирует браузерные события input и submit с данными формы через полученный в конструкторе интерфейс брокера сообщений и выводит сообщения об ошибках.
 
 Конструктор:
 
@@ -775,11 +776,14 @@ protected constructor(
 
 Поля:
 
-- `paymentToggler: IFormToggler` композиция для использования класса переключателя,
+- `paymentControls: HTMLButtonElement[];` - массив кнопок выбора способа платежа
+- `paymentInput: HTMLInputElement;` - скрытый инпут для записи и считывания способа платежа
+- `addressInput: HTMLInputElement;` - инпут для ввода адреса доставки
 
 Сеттеры:
 
-- `set payment(value: string)` - устанавливает отображение активной кнопки переключателя в композиции.
+- `set payment(value: string)` - устанавливает отображение активной кнопки переключателя
+- `set address(value: string)` - устанавливает значение в поле address
 
 Интерфейс для композиции c переключателем
 
@@ -790,40 +794,22 @@ interface IFormToggler {
     set activeButton(value: string); //сеттер, устанавливающий отображение активной кнопки
 }
 ```
-#### Класс FormTogglerButtons
-
-– вспомогательный элемент переключателя кнопок (например, выбор способа оплаты). Создает скрытый input в который записывает значение переключателя. При переключении генерирует событие "change" для возможности подписки родительским компонентом формы. Позволяет установить класс для отображения активной кнопки(самостоятельное переключение класса по клику исключено). Реализует интерфейс IFormToggler.
-
-Конструктор:
-
-```typescript
-constructor(
-        container: HTMLElement, // - родительский контейнер для всех кнопок переключателя
-        selector: string, // - селектор для поиска кнопок (должен быть одинаковым для всех кнопок)
-        inputName: string, // имя скрытого инпута, устанавливается в `input.name` для корректного сбора FormDate.
-        activeButtonClassName: string, // - имя класса для активной кнопки
-    )
-```
-
-Поля:
-
-- `controls: HTMLButtonElement[]` - список ссылок на кнопки переключателя,
-
-- `input: HTMLInputElement` - ссылка на инпут для записи значений
-
-- `activeButtonClassName: string` -  имя класса для активной кнопки
-
-Сеттеры:
-
-- `set activeButton(name: string)` – устанавливает отображение активной кнопки переключателя по полученному имени.
 
 #### Класс FormContactsView
 
 – форма ввода контактных данных (наследует `FormView` без дополнительных типов данных). Использует поля и методы родительского класса.
+Поля:
+
+- `phoneInput: HTMLInputElement;` - поле для ввода номера телефона
+- `emailInput: HTMLInputElement;` - поле для ввода email
 
 Конструктор:
 
 - `constructor(container: HTMLElement, events: IEvents)` - принимает ссылку на DOM элемент, содержащий форму, и  интерфейс брокера сообщений.
+
+Сеттеры:
+- `set phone(value: string)` - устанавливает значение в инпут phone
+- `set email(value: string)` - устанавливает значение в инпут email
 
 #### Класс OrderSuccessView
 

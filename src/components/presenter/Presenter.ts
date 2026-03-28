@@ -73,20 +73,36 @@ export class Presenter {
                     paymentTypeMap[buyerData.data.payment];
                 const error = objectToString(
                     buyerData.errors,
-                    " ",
+                    "\n",
                     "payment",
                     "address",
                 );
                 this.view.formOrder.render({
                     payment,
+                    address: buyerData.data.address,
                     error,
                     isSubmitDisabled: error.length > 0,
                 });
             } else if (this.currentModal === EModalState.form_contacts) {
                 const error = objectToString(buyerData.errors, " ");
                 this.view.formContacts.render({
+                    phone: buyerData.data.phone,
+                    email: buyerData.data.email,
                     error,
                     isSubmitDisabled: error.length > 0,
+                });
+            } else if (this.currentModal === EModalState.order_success) {
+              this.view.formOrder.render({
+                    payment: "",
+                    address: "",
+                    error: "",
+                    isSubmitDisabled: true,
+                });
+            this.view.formContacts.render({
+                    phone: "",
+                    email: "",
+                    error: "",
+                    isSubmitDisabled: true,
                 });
             }
         });
@@ -106,21 +122,20 @@ export class Presenter {
                     this.model.buyer.getData(),
                 );
             if (response) {
-                this.model.cart.clearProducts();
-                this.model.buyer.clearData();
-                this.view.formOrder.render({ reset: true });
-                this.view.formContacts.render({ reset: true });
                 const orderSuccess = this.view.orderSuccess.render({
                     total: `Списано ${response.total} синапсов`,
                 });
                 this.showModal(orderSuccess, EModalState.order_success);
-            }
+                this.model.cart.clearProducts();
+                this.model.buyer.clearData();
+            }   
         });
     }
     async updateCatalogue(): Promise<void> {
         const productsList = await this.api.getProducts();
         this.model.catalogue.setProducts(productsList);
     }
+
     /** to Buy or not to Buy */
     private toggleSelectedProductInCart(): void {
         const currentProduct: IProduct | null =

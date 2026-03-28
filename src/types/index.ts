@@ -160,13 +160,21 @@ export type TFormStatus = {
     reset: boolean; // - сбросить форму да/нет
 };
 
-/** Объект данных о типе платежа в форме */
-export type TFormPayment = {
+/** Объект данных принмаемых в render() FormOrderView* */
+export type TFormOrder = {
     payment: TOrderPayment;
+    address: string
+
 };
+/** Объект данных принмаемых в render() FormOrderView */
+export type TFormContacts = {
+    phone: string;
+    email: string;
+}
 
 /** Производный тип объединяющий все данные принимаемые FormOrder, включая типы от класса родителя */
-export type TFormOrder = TFormStatus & TFormPayment;
+export type TFormOrderView = TFormStatus & TFormOrder;
+export type TFormContactsView = TFormStatus & TFormContacts
 
 /** Интерфейс кнопочного переключателя для формы */
 export interface IFormToggler {
@@ -232,8 +240,8 @@ export interface IView {
     header: IComponent<THeader>;
     cardPreview: IComponent<TCardPreviewView>;
     cart: IComponent<TCart>;
-    formOrder: IComponent<TFormOrder>;
-    formContacts: IComponent<TFormStatus>;
+    formOrder: IComponent<TFormOrderView>;
+    formContacts: IComponent<TFormContactsView>;
     orderSuccess: IComponent<TOrderSuccess>;
     cardFactory: ICardFactory;
 }
@@ -280,4 +288,4 @@ export type TGalleryConstructor =
 export type TModalConstructor = IComponentWithEmitterParamConstructor<TModal>;
 export type TCartConstructor = IComponentWithEmitterParamConstructor<TCart>;
 export type TFormOrderConstructor =
-    IComponentWithEmitterParamConstructor<TFormOrder>;
+    IComponentWithEmitterParamConstructor<TFormOrderView>;

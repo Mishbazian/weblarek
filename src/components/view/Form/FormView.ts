@@ -28,7 +28,7 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
         this.errorsElement = ensureElement(".form__errors", this.container);
         this.form = this.container as HTMLFormElement;
 
-        this.form.addEventListener("change", () => {
+        this.form.addEventListener("input", () => {
             events.emit(
                 `form:${this.form.name}:change`,
                 new FormData(this.form),
@@ -49,11 +49,4 @@ export abstract class FormView<T> extends Component<TFormStatus & T> {
         this.errorsElement.textContent = message;
     }
 
-    set reset(value: boolean) {
-        if (value) {
-            this.form.reset();
-            this.errorsElement.textContent = "";
-            this.submitButton.disabled = true;
-        }
-    }
 }

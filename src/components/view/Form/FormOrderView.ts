@@ -1,33 +1,61 @@
-import { IFormToggler, TFormPayment } from "../../../types";
+import { TFormOrder } from "../../../types";
+import {
+    createElement,
+    ensureAllElements,
+    ensureElement,
+} from "../../../utils/utils";
 import { IEvents } from "../../base/Events";
-import { FormTogglerButtons } from "./FormTogglerButtons";
 import { FormView } from "./FormView";
 
 /**
  * форма выбора способа оплаты и адреса доставки (наследует `FormView<TFormPayment>`). Использует `FormTogglerButtons` через композицию.
  */
-export class FormOrderView extends FormView<TFormPayment> {
-    private paymentToggler: IFormToggler;
+export class FormOrderView extends FormView<TFormOrder> {
+    private paymentControls: HTMLButtonElement[];
+    private paymentInput: HTMLInputElement;
+    private addressInput: HTMLInputElement;
     /**
      * @constructor создает экземпляяр формы
      * @param {HTMLElement} container - ссылка на DOM элемент содержащий форму
      * @param {object} actions - объект с коллбэк-функциями для обработки событий формы
      */
-    constructor(container: HTMLElement, events: IEvents) {
+    constructor(container: HTMLFormElement, events: IEvents) {
         super(container, events);
-        this.paymentToggler = new FormTogglerButtons(
-            container,
-            ".button_alt", // селектор кнопок переключателя
-            "payment", // имя данных в форме
-            "button_alt-active", // имя класса активной кнопки
-        );
+        this.paymentControls = ensureAllElements<HTMLButtonElement>(".button_alt", this.container);
+        this.paymentInput = createElement<HTMLInputElement>("input", {
+            name: "payment",
+            type: "hidden",
+            value: "",
+        });
+        this.form.appendChild(this.paymentInput);
+        this.form.addEventListener("click", (e) => {
+            if (
+                e.target instanceof HTMLButtonElement &&
+                this.paymentControls.includes(e.target)
+            ) {
+                this.paymentInput.value = e.target.name;
+                this.container.dispatchEvent(new Event("input"));
+            }
+        });
+        this.addressInput = ensureElement<HTMLInputElement>(
+            'input[name="address"]',
+            this.form,
+        ) as HTMLInputElement;
     }
 
     set payment(value: string) {
-        this.paymentToggler.activeButton = value;
+
+        this.paymentControls.forEach((button) =>{
+            console.log('сначала', button.name, value, button.className)
+            button.classList.toggle(
+                "button_alt-active",
+                value === button.name,
+            )
+        }
+        );
+        this.paymentInput.value = value;
     }
-    set reset(value: true) {
-        super.reset = value;
-        if (value) this.paymentToggler.activeButton = "";
+    set address(value: string) {
+        this.addressInput.value = value;
     }
 }
