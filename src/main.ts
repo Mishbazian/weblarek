@@ -58,8 +58,8 @@ const view: IView = {
     orderSuccess,
     cardFactory,
 };
-
+// Инстанс Презентера
 const presenter = new Presenter(emitter, api, models, view);
 
-//Обновление данных с сервера и наполнение каталога
-await presenter.updateCatalogue();
+//Запуск приложения
+presenter.init();

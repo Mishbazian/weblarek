@@ -25,37 +25,54 @@ export class Presenter {
         private api: IProductApi,
         private model: IModels,
         private view: IView,
-    ) {
-        emitter.on<IProduct[]>("model:catalogue:update", (data) =>
+    ) {}
+
+    public init(): void {
+        this.subscribeModelEvents();
+        this.subscribeViewEvents();
+        this.updateCatalogue();
+    }
+
+    private subscribeModelEvents(): void {
+        this.emitter.on<IProduct[]>("model:catalogue:update", (data) =>
             this.renderGallery(data),
         );
-        emitter.on<IProduct>("card:select", (item) => {
-            this.model.catalogue.setSelectedProduct(item);
-        });
-        emitter.on<IProduct>("model:catalogue:select", (product) => {
+        this.emitter.on<IProduct>("model:catalogue:select", (product) => {
             this.renderPreview(product);
         });
-        emitter.on<IProduct>("card:action", () => {
-            this.toggleSelectedProductInCart();
-            this.modalClose();
-        });
-        emitter.on<TCartData>("model:cart:update", (cartData) => {
+        this.emitter.on<TCartData>("model:cart:update", (cartData) => {
             this.view.header.render({ counter: cartData.count });
             this.renderCart(cartData);
         });
-        emitter.on<IProduct>("cart:remove", (product) => {
+    }
+    private subscribeViewEvents(): void {
+        this.emitter.on<IProduct>("card:select", (item) => {
+            this.model.catalogue.setSelectedProduct(item);
+        });
+
+        this.emitter.on<IProduct>("card:action", () => {
+            this.toggleSelectedProductInCart();
+            this.modalClose();
+        });
+
+        this.emitter.on<IProduct>("cart:remove", (product) => {
             this.model.cart.removeProduct(product);
         });
-        emitter.on(/modal\:close|order\:complete/, () => this.modalClose());
-        emitter.on("cart:show", () => this.showModal(this.view.cart.render()));
-        emitter.on("order:create", () =>
+
+        this.emitter.on(/modal\:close|order\:complete/, () =>
+            this.modalClose(),
+        );
+        this.emitter.on("cart:show", () =>
+            this.showModal(this.view.cart.render()),
+        );
+        this.emitter.on("order:create", () =>
             this.showModal(this.view.formOrder.render({ error: "" })),
         );
-        emitter.on<Partial<TFormContacts & TFormOrder>>(
+        this.emitter.on<Partial<TFormContacts & TFormOrder>>(
             /^form:(\w*):change$/,
             (data) => this.updateBuyer(data),
         );
-        emitter.on<Partial<IBuyer>>("model:buyer:update", (data) => {
+        this.emitter.on<Partial<IBuyer>>("model:buyer:update", (data) => {
             const formData: Partial<TFormData> = Object.fromEntries(
                 Object.entries(data).map(([key, value]) => {
                     if (key === "payment") {
@@ -96,10 +113,10 @@ export class Presenter {
                 });
             }
         });
-        emitter.on("form:order:submit", () => {
+        this.emitter.on("form:order:submit", () => {
             this.showModal(this.view.formContacts.render({ error: "" }));
         });
-        emitter.on("form:contacts:submit", async () => {
+        this.emitter.on("form:contacts:submit", async () => {
             const response: Awaited<ReturnType<typeof this.api.postOrder>> =
                 await this.api.postOrder(
                     this.model.cart.getProducts().map((item) => {
@@ -118,9 +135,12 @@ export class Presenter {
             }
         });
     }
-    async updateCatalogue(): Promise<void> {
-        const productsList = await this.api.getProducts();
-        this.model.catalogue.setProducts(productsList);
+
+    private updateCatalogue(): void {
+        this.api.getProducts().then((productsList)=>
+        this.model.catalogue.setProducts(productsList)).catch((error)=>{
+            throw new Error(error)
+        })
     }
 
     /** to Buy or not to Buy */
