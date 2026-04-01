@@ -410,30 +410,11 @@ Presenter - презентер содержит основную логику п
     }
     ```
 **Интерфейсы конструкторов**
- - Дженерик интерфейс конструктора компонента, принимающего коллбэк с эмиттером 
-    ```typescript
-    export interface IComponentWithEventCallbackParamConstructor<T, V extends Partial<TActions> | undefined > {
-        new (container: HTMLElement, actions: V): IComponent<T>
+ - Интерфейсы конструкторов карточек
+     ```typescript
+    export interface ICardConstructor<T extends (TCardCatalogueView | TCardCartView)> {
+    new (container: HTMLElement, actions: TCardActions): IComponent<T>;
     }
-    ```
- - Дженерик интерфейс конструктора компонента, принимающего брокер событий 
-    ```typescript
-    export interface IComponentWithEmitterParamConstructor<T> {
-        new (events: IEvents, container: HTMLElement,): IComponent<T>
-    }
-    ```
-
- - Интерфейс конструктора карточек для корзины 
-    ```typescript
-    export type TCardCartConstructor =  IComponentWithEventCallbackParamConstructor<TCardCartView, TCardActions>`
-    ```
- - Интерфейс конструктора карточек для превью 
-    ```typescript
-    export type TCardPreviewConstructor = IComponentWithEventCallbackParamConstructor<TCardPreviewView, TCardActions | undefined>`
-    ```
- - Интерфейс конструктора карточек для каталога 
-    ```typescript
-    export type TCardCatalogueConstructor = IComponentWithEventCallbackParamConstructor<TCardCartView, TCardActions>`
     ```
 
 ### Модели данных
@@ -828,8 +809,8 @@ interface IFormToggler {
 
     ```typescript
     constructor(        
-        private cardCart: TCardCartConstructor = CardCartView, // - интерфейс конструктора компонента карточек для корзины
-        private cardCatalogue: TCardCatalogueConstructor = CardPreviewView, // - интерфейс конструктора компонента карточек для каталога
+        private cardCart: ICardConstructor<TCardCartView> = CardCartView, // - интерфейс конструктора компонента карточек для корзины
+        private cardCatalogue: ICardConstructor<TCardCatalogueView> = CardPreviewView, // - интерфейс конструктора компонента карточек для каталога
     ) {}
     ```
 Методы:\
